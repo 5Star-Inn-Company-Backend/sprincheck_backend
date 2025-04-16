@@ -33,7 +33,7 @@ class BVNController extends Controller
 
         if($kyc){
             $resp=json_decode($kyc->data,true);
-            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'data' => ['image' => $resp['base64Image'], 'reference' =>$kyc->reference]]);
+            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$request->get('biz')->confidence_level, 'data' => ['image' => $resp['base64Image'], 'reference' =>$kyc->reference]]);
         }
 
 
@@ -44,7 +44,7 @@ class BVNController extends Controller
             $userService = new PremblyService();
             $data=$userService->bvn($input['number'],$request->get('biz')->id);
 
-            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'data' => $data]);
+            return response()->json(['success' => 1, 'message' => 'Verified Successfully',  'confidence_level'=>$request->get('biz')->confidence_level, 'data' => $data]);
 
         } catch (\Exception $e) {
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
@@ -97,7 +97,7 @@ class BVNController extends Controller
                 'billing_id' => 1,
                 'type' => 'BVN VERIFICATION',
                 'source' => 'API',
-                'status' =>doubleval($input['confidence']) > 0.7 ?'1':'0',
+                'status' =>doubleval($input['confidence']) >= doubleval($request->get('biz')->confidence_level) ?'1':'0',
                 'confidence' => $input['confidence'],
                 'image' => $url
             ]);
