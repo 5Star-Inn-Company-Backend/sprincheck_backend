@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\api\sdk;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kyc;
+use App\Jobs\ServiceDebitJob;
 use App\Models\KycLog;
 use App\Models\KycNIN;
 use App\Services\MonoService;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -30,11 +29,21 @@ class NINController extends Controller
             return response()->json(['success' => 0, 'message' => implode(",", $validator->errors()->all())]);
         }
 
+        $biz=$request->get('biz')->refresh();
+
+        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"NIN");
+
+        if($fee > $biz->wallet){
+            return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
+        }
+
         $kyc=KycNIN::where('nin', $input['number'])->first();
 
         if($kyc){
+            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'NIN_VERIFICATION');
+
             $resp=json_decode($kyc->data,true);
-            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$request->get('biz')->confidence_level, 'data' => ['image' => $resp['photo'], 'reference' =>$kyc->reference]]);
+            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['photo'], 'reference' =>$kyc->reference]]);
         }
 
 
@@ -44,13 +53,15 @@ class NINController extends Controller
 
             if(env('NIN_VERIFICATION') == "MONO"){
                 $userService = new MonoService();
-                $data=$userService->nin($input['number'],$request->get('biz')->id);
+                $data=$userService->nin($input['number'],$biz->id);
             }else{
                 $userService = new PremblyService();
-                $data=$userService->nin($input['number'],$request->get('biz')->id);
+                $data=$userService->nin($input['number'],$biz->id);
             }
 
-            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$request->get('biz')->confidence_level, 'data' => $data]);
+            ServiceDebitJob::dispatch($fee, $data['reference'],$biz, 'NIN_VERIFICATION');
+
+            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => $data]);
 
         } catch (\Exception $e) {
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
