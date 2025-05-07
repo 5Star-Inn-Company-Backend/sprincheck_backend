@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\sdk;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ServiceDebitJob;
+use App\Jobs\WebhookNotificationJob;
 use App\Models\KycLog;
 use App\Models\KycNIN;
 use App\Services\MonoService;
@@ -76,7 +77,8 @@ class NINController extends Controller
             'number' => 'required|digits:11',
             'reference' => 'required',
             'image' => 'required',
-            'confidence' => 'required'
+            'confidence' => 'required',
+            'identifier' => 'required'
         );
 
         $validator = Validator::make($input, $rules);
@@ -93,6 +95,9 @@ class NINController extends Controller
 
         Log::info("Running NIN Valid on");
 
+
+        $biz=$request->get('biz')->refresh();
+
         try {
 
 //            $file = $request->file('file');
@@ -107,17 +112,22 @@ class NINController extends Controller
             // Get the URL of the uploaded file
             $url = $disk->url($fileName);
 
-            KycLog::create([
+            $k=KycLog::create([
                 'kycnin_id' => $kyc->id,
-                'business_id' => $request->get('biz')->id,
+                'business_id' => $biz->id,
                 'user_id' => $request->get('user')->id,
                 'billing_id' => 1,
                 'type' => 'NIN VERIFICATION',
                 'source' => 'API',
-                'status' =>doubleval($input['confidence']) >= doubleval($request->get('biz')->confidence_level) ?'1':'0',
+                'status' =>doubleval($input['confidence']) >= doubleval($biz->confidence_level) ?'1':'0',
                 'confidence' => $input['confidence'],
+                'identifier' => $input['identifier'],
                 'image' => $url
             ]);
+
+            if($biz->webhook_url) {
+                WebhookNotificationJob::dispatch($k, $input['number']);
+            }
 
             return response()->json(['success' => 1, 'message' => 'Recorded Successfully', 'data' => $kyc->name]);
 
