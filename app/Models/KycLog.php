@@ -6,7 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class KycLog extends Model
 {
-    protected $guarded =[];
+    protected $fillable = [
+      'business_id',
+      'type',
+      'identifier',
+      'user_id',
+      'billing_id',
+      'kycnin_id',
+      'kyc_id',
+      'status',
+      'data',
+      'source',
+      'confidence',
+      'image'
+    ];
 
     function nin()
     {
