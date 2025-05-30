@@ -27,7 +27,9 @@ class AuthController extends Controller
         }
 
         $business = Business::create([
-            'name' => $request->business_name
+            'name' => $request->business_name,
+            'encryption_key' => Str::random(32),
+            'api_key' => "scb-".Str::random(42),
         ]);
 
         $user = User::create([
@@ -66,8 +68,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Login successful',
-            'token' => $token,
-            'data' => $user
+            'token' => $token
         ]);
     }
 

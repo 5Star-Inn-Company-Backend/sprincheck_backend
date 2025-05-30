@@ -20,6 +20,9 @@ Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'getDashboard']);
     Route::get('/dashboard/stats', [DashboardController::class, 'getDashboardStats']);
+    Route::get('/history', [DashboardController::class, 'getHistory']);
+    Route::get('/wallet-history', [DashboardController::class, 'getWalletHistory']);
+    Route::post('/update-webhook', [DashboardController::class, 'updateWebhookUrl']);
 });
 
 require_once 'sdk.php';

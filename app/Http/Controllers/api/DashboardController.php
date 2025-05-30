@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\KycLog;
 use App\Models\VirtualAccount;
+use App\Models\WalletTracker;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
@@ -21,7 +23,7 @@ class DashboardController extends Controller
         $walletBalance = $business->wallet ?? 0;
 
         // Get virtual accounts
-        $virtualAccounts = VirtualAccount::where('business_id', $business->id)->get();
+        $virtualAccounts = VirtualAccount::where([['business_id', $business->id], ['status',1]])->select('id','account_number','customer_name','bank_name')->get();
 
         // Get API call statistics
         $totalCalls = KycLog::where('business_id', $business->id)->count();
@@ -36,6 +38,7 @@ class DashboardController extends Controller
         return response()->json([
             'status' => true,
             'data' => [
+                'user' => $user,
                 'wallet_balance' => $walletBalance,
                 'virtual_accounts' => $virtualAccounts,
                 'api_calls' => [
@@ -77,6 +80,60 @@ class DashboardController extends Controller
         return response()->json([
             'status' => true,
             'data' => $graphData
+        ]);
+    }
+
+    
+    public function getHistory(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->business;
+
+        $data = KycLog::with('bvn','nin')->where('business_id', $business->id)->orderBy('created_at', 'desc')->paginate(20);
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
+    }
+
+    
+    public function getWalletHistory(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->business;
+
+        $data = WalletTracker::where('business_id', $business->id)->orderBy('created_at', 'desc')->paginate(20);
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
+    }
+
+    public function updateWebhookUrl(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'webhook_url' => 'required|url'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => implode(', ', $validator->errors()->all()),
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+        $business = $user->business;
+
+        $business->update([
+            'webhook_url' => $request->webhook_url
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Webhook URL updated successfully'
         ]);
     }
 }
