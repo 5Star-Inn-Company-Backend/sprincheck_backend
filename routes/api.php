@@ -23,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/history', [DashboardController::class, 'getHistory']);
     Route::get('/wallet-history', [DashboardController::class, 'getWalletHistory']);
     Route::post('/update-webhook', [DashboardController::class, 'updateWebhookUrl']);
+    Route::put('/regenerate-keys', [DashboardController::class, 'regenerateKeys']);
+    Route::post('/generate-account', [\App\Http\Controllers\api\VirtualAccountGeneration::class, 'generatePaylony']);
 });
 
 require_once 'sdk.php';

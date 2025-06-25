@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -23,7 +24,7 @@ class DashboardController extends Controller
         $walletBalance = $business->wallet ?? 0;
 
         // Get virtual accounts
-        $virtualAccounts = VirtualAccount::where([['business_id', $business->id], ['status',1]])->select('id','account_number','customer_name','bank_name')->get();
+        $virtualAccounts = VirtualAccount::where([['business_id', $business->id], ['status','active']])->select('id','account_number','customer_name','bank_name')->get();
 
         // Get API call statistics
         $totalCalls = KycLog::where('business_id', $business->id)->count();
@@ -83,7 +84,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    
+
     public function getHistory(Request $request)
     {
         $user = $request->user();
@@ -97,7 +98,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    
+
     public function getWalletHistory(Request $request)
     {
         $user = $request->user();
@@ -134,6 +135,22 @@ class DashboardController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Webhook URL updated successfully'
+        ]);
+    }
+
+    public function regenerateKeys(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->business;
+
+        $business->update([
+            'encryption_key' => 'enc'.Str::random(29),
+            'api_key' => "scb".Str::random(42),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Business Keys regenerated successfully'
         ]);
     }
 }

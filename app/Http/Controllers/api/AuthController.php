@@ -28,8 +28,8 @@ class AuthController extends Controller
 
         $business = Business::create([
             'name' => $request->business_name,
-            'encryption_key' => Str::random(32),
-            'api_key' => "scb-".Str::random(42),
+            'encryption_key' => 'enc'.Str::random(29),
+            'api_key' => "scb".Str::random(42),
         ]);
 
         $user = User::create([
@@ -84,7 +84,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         $resetCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         $user->update([
             'reset_code' => Hash::make($resetCode),
             'reset_code_expires_at' => now()->addMinutes(15)
