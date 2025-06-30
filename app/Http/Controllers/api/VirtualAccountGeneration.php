@@ -401,7 +401,7 @@ class VirtualAccountGeneration extends Controller
                     default => strtoupper(env('PAYLONY_BANK', 'gtb')),
                 };
 
-                VirtualAccountClient::create([
+                $v=VirtualAccountClient::create([
                     "business_id" => $bizz->id,
                     "account_reference" => $u->id,
                     "currency_code" => "NGN",
@@ -418,7 +418,8 @@ class VirtualAccountGeneration extends Controller
 
                 return response()->json([
                     'status' => true,
-                    'message' => "Business Account generated successfully!"
+                    'message' => "Business Account generated successfully!",
+                    'data' => $v
                 ]);
             } else {
                 return response()->json([

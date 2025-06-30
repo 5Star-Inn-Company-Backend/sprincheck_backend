@@ -150,7 +150,8 @@ class DashboardController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Business Keys regenerated successfully'
+            'message' => 'Business Keys regenerated successfully',
+            'data' => $business
         ]);
     }
 }
