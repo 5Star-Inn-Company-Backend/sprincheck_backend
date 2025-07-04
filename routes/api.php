@@ -16,6 +16,9 @@ Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/auth/verify-reset-code', [AuthController::class, 'verifyResetCode']);
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
+// Public: List of countries
+Route::get('/countries', [DashboardController::class, 'getCountries']);
+
 // Dashboard Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'getDashboard']);
