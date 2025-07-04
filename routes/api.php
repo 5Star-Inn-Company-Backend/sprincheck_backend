@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/generate-account', [\App\Http\Controllers\api\VirtualAccountGeneration::class, 'generatePaylony']);
     Route::put('/profile', [DashboardController::class, 'updateProfile']);
     Route::put('/business', [DashboardController::class, 'updateBusinessInfo']);
+    Route::put('/change-password', [DashboardController::class, 'changePassword']);
 });
 
 require_once 'sdk.php';
