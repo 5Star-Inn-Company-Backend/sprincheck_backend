@@ -25,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-webhook', [DashboardController::class, 'updateWebhookUrl']);
     Route::put('/regenerate-keys', [DashboardController::class, 'regenerateKeys']);
     Route::post('/generate-account', [\App\Http\Controllers\api\VirtualAccountGeneration::class, 'generatePaylony']);
+    Route::put('/profile', [DashboardController::class, 'updateProfile']);
+    Route::put('/business', [DashboardController::class, 'updateBusinessInfo']);
 });
 
 require_once 'sdk.php';

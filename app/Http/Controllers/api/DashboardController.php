@@ -15,6 +15,82 @@ use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
+
+    /**
+     * Update authenticated user's business info
+     */
+    public function updateBusinessInfo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'business_email' => 'required|email|max:255',
+            'business_phone_number' => 'required|string|max:20',
+            'business_registration_number' => 'nullable|string|max:100',
+            'business_address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'business_description' => 'nullable|string|max:1000',
+            'country' => 'nullable|string|max:100',
+            'tax_identification_number' => 'nullable|string|max:100',
+            'business_website' => 'nullable|url|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => implode(', ', $validator->errors()->all()),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = $request->user();
+        $business = $user->business;
+        $business->update($request->only([
+            'business_email',
+            'business_phone_number',
+            'business_registration_number',
+            'business_address',
+            'city',
+            'business_description',
+            'country',
+            'tax_identification_number',
+            'business_website',
+        ]));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Business info updated successfully',
+            'data' => $business
+        ]);
+    }
+
+
+    /**
+     * Update authenticated user's profile (name and phone_number only)
+     */
+    public function updateProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => implode(', ', $validator->errors()->all()),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = $request->user();
+        $user->update($request->only(['name', 'phone_number']));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile updated successfully',
+            'data' => $user->only(['id', 'name', 'email', 'phone_number'])
+        ]);
+    }
+
     public function getDashboard(Request $request)
     {
         $user = $request->user();

@@ -14,7 +14,16 @@ class Business extends Model
         'confidence_level',
         'webhook_url',
         'api_key',
-        'encryption_key'
+        'encryption_key',
+        'business_email',
+        'business_phone_number',
+        'business_registration_number',
+        'business_address',
+        'city',
+        'business_description',
+        'country',
+        'tax_identification_number',
+        'business_website',
     ];
 
     public function users()
