@@ -31,6 +31,7 @@ class MerchantSignatureCheck
 
         $signature=hash_hmac('SHA512',$ddata,$business->encryption_key);
 
+        Log::info('Data: ' . json_encode($request->all()));
         Log::info('Data for Signature: ' . $ddata);
         Log::info('Generated Signature: ' . $signature);
         Log::info('Received  Signature: ' . $key);
