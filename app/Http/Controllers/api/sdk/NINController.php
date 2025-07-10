@@ -48,6 +48,11 @@ class NINController extends Controller
         }
 
 
+        // Check if number starts with 0 or 1
+        if (preg_match('/^[01]/', $input['number'])) {
+            return response()->json(['success' => 0, 'message' => 'Invalid number: cannot start with 0 or 1.']);
+        }
+
         Log::info("Running Kyc check on ".$input['number']);
 
         try {
