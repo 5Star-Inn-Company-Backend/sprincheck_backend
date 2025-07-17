@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\sdk\BVNController;
+use App\Http\Controllers\api\sdk\FacialController;
 use App\Http\Controllers\api\sdk\NINController;
 use App\Http\Middleware\MerchantSignatureCheck;
 use Illuminate\Http\Request;
@@ -13,4 +14,7 @@ Route::prefix('sdk')->middleware([\App\Http\Middleware\MerchantApiKey::class, Me
 
     Route::post('nin', [NINController::class, 'check']);
     Route::put('nin', [NINController::class, 'sdk_resp'])->withoutMiddleware([MerchantSignatureCheck::class]);
+
+    Route::post('facial', [FacialController::class, 'check']);
+    Route::put('facial', [FacialController::class, 'sdk_resp'])->withoutMiddleware([MerchantSignatureCheck::class]);
 });

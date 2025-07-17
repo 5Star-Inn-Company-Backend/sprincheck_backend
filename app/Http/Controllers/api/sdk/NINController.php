@@ -32,6 +32,13 @@ class NINController extends Controller
 
         $biz=$request->get('biz')->refresh();
 
+
+        $kyc=KycLog::where([['identifier', $input['identifier']], ['business_id', $biz->id]])->first();
+
+        if($kyc){
+            return response()->json(['success' => 0, 'message' => 'Identifier already exist. Kindly try again with a unique identifier']);
+        }
+
         $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"NIN");
 
         if($fee > $biz->wallet){
@@ -118,7 +125,7 @@ class NINController extends Controller
             $url = $disk->url($fileName);
 
             $k=KycLog::create([
-                'kycnin_id' => $kyc->id,
+                'kyc_id' => $kyc->id,
                 'business_id' => $biz->id,
                 'user_id' => $request->get('user')->id,
                 'billing_id' => 1,
@@ -127,6 +134,7 @@ class NINController extends Controller
                 'status' =>doubleval($input['confidence']) >= doubleval($biz->confidence_level) ?'1':'0',
                 'confidence' => $input['confidence'],
                 'identifier' => $input['identifier'],
+                'reference' => $input['reference'],
                 'image' => $url
             ]);
 

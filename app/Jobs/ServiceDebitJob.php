@@ -32,6 +32,8 @@ class ServiceDebitJob implements ShouldQueue
      */
     public function handle(): void
     {
+        $this->biz->refresh();
+
         WalletTracker::create([
             'reference' => $this->reference,
             'description' => $this->description,

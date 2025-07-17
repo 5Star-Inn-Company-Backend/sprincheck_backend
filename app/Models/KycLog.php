@@ -23,7 +23,7 @@ class KycLog extends Model
 
     function nin()
     {
-      return $this->belongsTo(KycNIN::class,'kycnin_id')->select('id','data');
+      return $this->belongsTo(KycNIN::class,'kyc_id')->select('id','data');
     }
 
     function bvn()

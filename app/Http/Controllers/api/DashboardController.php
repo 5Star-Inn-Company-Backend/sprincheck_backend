@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\KycLogResource;
 use App\Models\Business;
 use App\Models\KycLog;
 use App\Models\VirtualAccount;
@@ -408,11 +409,16 @@ class DashboardController extends Controller
         $user = $request->user();
         $business = $user->business;
 
-        $data = KycLog::with('bvn','nin')->where('business_id', $business->id)->orderBy('created_at', 'desc')->paginate(20);
+        $data = KycLog::where('business_id', $business->id)->orderBy('created_at', 'desc')->paginate(20);
+
+        $transformedData = $data->through(function ($log) {
+//            return KycLogResource::collection($log);
+            return new KycLogResource($log);
+        });
 
         return response()->json([
             'status' => true,
-            'data' => $data
+            'data' => $transformedData->toArray()
         ]);
     }
 
