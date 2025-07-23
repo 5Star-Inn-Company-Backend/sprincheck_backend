@@ -18,7 +18,8 @@ class KycLog extends Model
       'data',
       'source',
       'confidence',
-      'image'
+      'image',
+      'reference'
     ];
 
     function nin()
