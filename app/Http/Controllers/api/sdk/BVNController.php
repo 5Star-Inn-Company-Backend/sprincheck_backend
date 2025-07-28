@@ -190,9 +190,12 @@ class BVNController extends Controller
 
             try {
                 $userService = new PremblyService();
-                $data=$userService->bvn($input['number'],$biz->id);
+                $res=$userService->bvn($input['number'],$biz->id,"API");
+                $kyc=$res['kyc'];
+                $data=$res['data'];
 
             } catch (\Exception $e) {
+                Log::error("Error on BVN", [$e]);
                 return response()->json(['success' => 0, 'message' => $e->getMessage()]);
             }
         }

@@ -51,7 +51,7 @@ class PremblyService
             }
 
             $name=$resp['data']['lastName'] . " " .$resp['data']['firstName'] . " " .$resp['data']['middleName'];
-            Kyc::create([
+            $k=Kyc::create([
                 "user_id" => $user_id,
                 "bvn" => $number,
                 "reference" => $resp['verification']['reference'],
@@ -62,7 +62,7 @@ class PremblyService
             if($type == "sdk"){
                 return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['verification']['reference']];
             }else{
-                return $resp['data'];
+                return ['kyc' => $k, 'data' => $resp['data']] ;
             }
 
         } catch (\Exception $e) {
@@ -73,7 +73,7 @@ class PremblyService
         }
     }
 
-    public function nin($number, $user_id){
+    public function nin($number, $user_id, $type="sdk"){
         try {
 
             $payload= '{
@@ -114,7 +114,7 @@ class PremblyService
             }
 
             $name=$resp['nin_data']['surname'] . " " .$resp['nin_data']['firstname'] . " " .$resp['nin_data']['middlename'];
-            KycNIN::create([
+            $k=KycNIN::create([
                 "user_id" => $user_id,
                 "nin" => $number,
                 "reference" => $resp['verification']['reference'],
@@ -122,7 +122,11 @@ class PremblyService
                 "data" => json_encode($resp['nin_data']),
             ]);
 
-            return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['verification']['reference']];
+            if($type == "sdk"){
+                return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['verification']['reference']];
+            }else{
+                return ['kyc' => $k, 'data' => $resp['nin_data']] ;
+            }
 
         } catch (\Exception $e) {
             Log::info("Error encountered on Prembly account verification on " . $number);

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class MonoService
 {
 
-    public function nin($number, $user_id){
+    public function nin($number, $user_id, $type="sdk"){
         try {
 
             $payload= '{
@@ -57,7 +57,7 @@ class MonoService
 
             $ref=uniqid()."-".time();
 
-            KycNIN::create([
+            $k=KycNIN::create([
                 "user_id" => $user_id,
                 "nin" => $number,
                 "reference" => $ref,
@@ -66,7 +66,11 @@ class MonoService
                 "data" => json_encode($resp['data']),
             ]);
 
-            return  ['image' => $resp['data']['photo'], 'reference' =>$ref];
+            if($type == "sdk"){
+                return  ['image' => $resp['data']['photo'], 'reference' =>$ref];
+            }else{
+                return ['kyc' => $k, 'data' => $resp['data']] ;
+            }
 
         } catch (\Exception $e) {
             Log::info("Error encountered on Mono account verification on " . $number);

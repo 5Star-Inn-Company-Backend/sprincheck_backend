@@ -192,8 +192,8 @@ class NINController extends Controller
         }else{
 
             // Check if number starts with 0 or 1
-            if (preg_match('/^[01]/', $input['number'])) {
-                return response()->json(['success' => 0, 'message' => 'Invalid number: cannot start with 0 or 1.']);
+            if (preg_match('/^[0]/', $input['number'])) {
+                return response()->json(['success' => 0, 'message' => 'Invalid number: cannot start with 0.']);
             }
 
             Log::info("Running Kyc check on ".$input['number']);
@@ -201,13 +201,16 @@ class NINController extends Controller
             try {
                 if(env('NIN_VERIFICATION') == "MONO"){
                     $userService = new MonoService();
-                    $data=$userService->nin($input['number'],$biz->id);
+                    $res=$userService->nin($input['number'],$biz->id,"API");
                 }else{
                     $userService = new PremblyService();
-                    $data=$userService->nin($input['number'],$biz->id);
+                    $res=$userService->nin($input['number'],$biz->id,"API");
                 }
+                $kyc=$res['kyc'];
+                $data=$res['data'];
 
             } catch (\Exception $e) {
+                Log::error("Error on NIN", [$e]);
                 return response()->json(['success' => 0, 'message' => $e->getMessage()]);
             }
         }
