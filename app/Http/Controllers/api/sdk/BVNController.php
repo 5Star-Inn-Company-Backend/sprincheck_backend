@@ -121,7 +121,7 @@ class BVNController extends Controller
                 'user_id' => $request->get('user')->id,
                 'billing_id' => 1,
                 'type' => 'BVN VERIFICATION',
-                'source' => 'API',
+                'source' => 'SDK',
                 'status' =>doubleval($input['confidence']) >= doubleval($biz->confidence_level) ?'1':'0',
                 'confidence' => $input['confidence'],
                 'identifier' => $input['identifier'],
@@ -142,6 +142,83 @@ class BVNController extends Controller
             return response()->json(['success' => 0, 'message' => 'Unable to verify try again later.']);
         }
 
+    }
+
+    public function merchant(Request $request)
+    {
+        $input = $request->all();
+        $rules = array(
+            'number' => 'required|digits:11',
+            'identifier' => 'required'
+        );
+
+        $validator = Validator::make($input, $rules);
+
+        if (!$validator->passes()) {
+            return response()->json(['success' => 0, 'message' => implode(",", $validator->errors()->all())]);
+        }
+
+        $reference=Str::uuid();
+        $biz=$request->get('biz')->refresh();
+
+        $kyc=KycLog::where([['identifier', $input['identifier']], ['business_id', $biz->id]])->first();
+
+        if($kyc){
+            return response()->json(['success' => 0, 'message' => 'Identifier already exist. Kindly try again with a unique identifier']);
+        }
+
+        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"BVN");
+
+        if($fee > $biz->wallet){
+            return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
+        }
+
+        $kyc=Kyc::where('bvn', $input['number'])->first();
+
+        if($kyc){
+            ServiceDebitJob::dispatch($fee, $reference,$biz,'BVN_VERIFICATION');
+
+            $data=json_decode($kyc->data,true);
+        }else{
+
+            // Check if number starts with 0 or 1
+            if (preg_match('/^[01]/', $input['number'])) {
+                return response()->json(['success' => 0, 'message' => 'Invalid number: cannot start with 0 or 1.']);
+            }
+
+            Log::info("Running Kyc check on ".$input['number']);
+
+            try {
+                $userService = new PremblyService();
+                $data=$userService->bvn($input['number'],$biz->id);
+
+            } catch (\Exception $e) {
+                return response()->json(['success' => 0, 'message' => $e->getMessage()]);
+            }
+        }
+
+
+        $k=KycLog::create([
+            'kyc_id' => $kyc->id,
+            'business_id' => $biz->id,
+            'user_id' => $request->get('user')->id,
+            'billing_id' => 1,
+            'type' => 'BVN VERIFICATION',
+            'source' => 'API',
+            'status' =>"1",
+            'confidence' => "0",
+            'identifier' => $input['identifier'],
+            'reference' => $reference,
+            'image' => ""
+        ]);
+
+        if($biz->webhook_url) {
+            WebhookNotificationJob::dispatch($k, $input['number']);
+        }
+
+        ServiceDebitJob::dispatch($fee, $reference,$biz, 'BVN_VERIFICATION');
+
+        return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'data' => $data]);
     }
 
 }

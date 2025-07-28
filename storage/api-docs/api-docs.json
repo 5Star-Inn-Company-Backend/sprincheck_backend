@@ -1,0 +1,309 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SprintCheck SDK API Documentation",
+        "description" : "SprintCheck API for identity verification, supporting BVN and NIN verification flows.",
+        "version": "1.0.0",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        },
+        "contact": {
+            "name": "SprintCheck",
+            "url": "https://sprintcheck.megasprintlimited.com.ng",
+            "email": "info@megasprintlimited.com.ng"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api.sprintcheck.megasprintlimited.com.ng/api/v1",
+            "description": "Production Server"
+        },
+        {
+            "url": "http://127.0.0.1:8877/api/v1",
+            "description": "Development Server"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Identity Verification",
+            "description": "Identity Verification"
+        },
+        {
+            "name": "Document Verification",
+            "description": "Document Verification"
+        }
+    ],
+    "paths": {
+        "/bvn": {
+            "post": {
+                "tags": [
+                    "Identity Verification"
+                ],
+                "summary": "Verify BVN",
+                "operationId": "verifyBvn",
+                "description": "Verify BVN",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyBvnRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "in": "header",
+                        "description": "HMAC-SHA512 signature of the request body with your encryption key. For PHP: hash_hmac('SHA512',PAYLOAD,ENCRYPTION_KEY)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "fc726fab7c0fa6f60c38e2ebcfa91d1fdce33a99e56b8a78a11c19a5fd92ea9dc2d33ed428efe714c0424f68d2e1734052151fac092a965fa6d02db33f817523"
+                    }
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/nin": {
+            "post": {
+                "tags": [
+                    "Identity Verification"
+                ],
+                "summary": "Verify NIN",
+                "operationId": "verifyNin",
+                "description": "Verify NIN",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyBvnRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "in": "header",
+                        "description": "HMAC-SHA512 signature of the request body with your encryption key. For PHP: hash_hmac('SHA512',PAYLOAD,ENCRYPTION_KEY)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "fc726fab7c0fa6f60c38e2ebcfa91d1fdce33a99e56b8a78a11c19a5fd92ea9dc2d33ed428efe714c0424f68d2e1734052151fac092a965fa6d02db33f817523"
+                    }
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/passport": {
+            "post": {
+                "tags": [
+                    "Document Verification"
+                ],
+                "summary": "Verify Passport",
+                "operationId": "verifyPassport",
+                "description": "Verify Passport",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyPassportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyPassportResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "in": "header",
+                        "description": "HMAC-SHA512 signature of the request body with your encryption key. For PHP: hash_hmac('SHA512',PAYLOAD,ENCRYPTION_KEY)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "fc726fab7c0fa6f60c38e2ebcfa91d1fdce33a99e56b8a78a11c19a5fd92ea9dc2d33ed428efe714c0424f68d2e1734052151fac092a965fa6d02db33f817523"
+                    }
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "VerifyBvnRequest": {
+                "type": "object",
+                "required": [
+                    "number",
+                    "identifier"
+                ],
+                "properties": {
+                    "number": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "identifier": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                }
+            },
+            "VerifyBvnResponse": {
+                "type": "object",
+                "required": [
+                    "success",
+                    "message",
+                    "data"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "number",
+                        "format": "number"
+                    },
+                    "message": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "data": {
+                        "type": "object"
+                    }
+                }
+            },
+            "VerifyPassportRequest": {
+                "type": "object",
+                "required": [
+                    "number",
+                    "first_number",
+                    "last_number",
+                    "dob",
+                    "identifier"
+                ],
+                "properties": {
+                    "number": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "first_number": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "last_number": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "dob": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "identifier": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                }
+            },
+            "VerifyPassportResponse": {
+                "type": "object",
+                "required": [
+                    "status",
+                    "data"
+                ],
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "bvn": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "first_name": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "last_name": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "middle_name": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "date_of_birth": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "gender": {
+                                "type": "string",
+                                "format": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization"
+            }
+        }
+    }
+}

@@ -34,3 +34,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 require_once 'sdk.php';
+require_once 'merchant.php';

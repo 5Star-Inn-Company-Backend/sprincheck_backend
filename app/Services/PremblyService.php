@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class PremblyService
 {
 
-    public function bvn($number, $user_id){
+    public function bvn($number, $user_id, $type="sdk"){
         try {
 
             $payload= '{
@@ -59,7 +59,11 @@ class PremblyService
                 "data" => json_encode($resp['data']),
             ]);
 
-            return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['verification']['reference']];
+            if($type == "sdk"){
+                return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['verification']['reference']];
+            }else{
+                return $resp['data'];
+            }
 
         } catch (\Exception $e) {
             Log::info("Error encountered on Prembly account verification on " . $number);
