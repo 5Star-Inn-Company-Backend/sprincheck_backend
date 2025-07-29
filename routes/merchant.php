@@ -5,6 +5,7 @@ use App\Http\Controllers\api\sdk\DriverLicenseController;
 use App\Http\Controllers\api\sdk\FacialController;
 use App\Http\Controllers\api\sdk\NINController;
 use App\Http\Controllers\api\sdk\PassportController;
+use App\Http\Controllers\api\sdk\VotersController;
 use App\Http\Middleware\MerchantSignatureCheck;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,8 @@ Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class])->g
     Route::post('passport', [PassportController::class, 'merchant']);
 
     Route::post('drivers-license', [DriverLicenseController::class, 'merchant']);
+
+    Route::post('voters', [VotersController::class, 'merchant']);
 
     Route::post('facial', [FacialController::class, 'check']);
 });

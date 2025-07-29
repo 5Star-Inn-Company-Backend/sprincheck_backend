@@ -230,6 +230,55 @@
                     }
                 ]
             }
+        },
+        "/voters": {
+            "post": {
+                "tags": [
+                    "Document Verification"
+                ],
+                "summary": "Verify Voters's Card",
+                "operationId": "verifyVotersCard",
+                "description": "Verify Voters Card",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyBvnRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "in": "header",
+                        "description": "HMAC-SHA512 signature of the request body with your encryption key. For PHP: hash_hmac('SHA512',PAYLOAD,ENCRYPTION_KEY)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "fc726fab7c0fa6f60c38e2ebcfa91d1fdce33a99e56b8a78a11c19a5fd92ea9dc2d33ed428efe714c0424f68d2e1734052151fac092a965fa6d02db33f817523"
+                    }
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
