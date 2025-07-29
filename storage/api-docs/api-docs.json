@@ -157,7 +157,56 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VerifyPassportResponse"
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "in": "header",
+                        "description": "HMAC-SHA512 signature of the request body with your encryption key. For PHP: hash_hmac('SHA512',PAYLOAD,ENCRYPTION_KEY)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "fc726fab7c0fa6f60c38e2ebcfa91d1fdce33a99e56b8a78a11c19a5fd92ea9dc2d33ed428efe714c0424f68d2e1734052151fac092a965fa6d02db33f817523"
+                    }
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/drivers-license": {
+            "post": {
+                "tags": [
+                    "Document Verification"
+                ],
+                "summary": "Verify Driver's License",
+                "operationId": "verifyDriversLicense",
+                "description": "Verify Drivers License",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyDriversLicenseRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
                                 }
                             }
                         }
@@ -227,8 +276,6 @@
                 "type": "object",
                 "required": [
                     "number",
-                    "first_number",
-                    "last_number",
                     "dob",
                     "identifier"
                 ],
@@ -237,17 +284,10 @@
                         "type": "string",
                         "format": "string"
                     },
-                    "first_number": {
-                        "type": "string",
-                        "format": "string"
-                    },
-                    "last_number": {
-                        "type": "string",
-                        "format": "string"
-                    },
                     "dob": {
                         "type": "string",
-                        "format": "string"
+                        "format": "string",
+                        "example": "YYYY-MM-DD"
                     },
                     "identifier": {
                         "type": "string",
@@ -255,45 +295,36 @@
                     }
                 }
             },
-            "VerifyPassportResponse": {
+            "VerifyDriversLicenseRequest": {
                 "type": "object",
                 "required": [
-                    "status",
-                    "data"
+                    "number",
+                    "dob",
+                    "last_name",
+                    "first_name",
+                    "identifier"
                 ],
                 "properties": {
-                    "status": {
+                    "number": {
                         "type": "string",
                         "format": "string"
                     },
-                    "data": {
-                        "type": "object",
-                        "properties": {
-                            "bvn": {
-                                "type": "string",
-                                "format": "string"
-                            },
-                            "first_name": {
-                                "type": "string",
-                                "format": "string"
-                            },
-                            "last_name": {
-                                "type": "string",
-                                "format": "string"
-                            },
-                            "middle_name": {
-                                "type": "string",
-                                "format": "string"
-                            },
-                            "date_of_birth": {
-                                "type": "string",
-                                "format": "string"
-                            },
-                            "gender": {
-                                "type": "string",
-                                "format": "string"
-                            }
-                        }
+                    "dob": {
+                        "type": "string",
+                        "format": "string",
+                        "example": "YYYY-MM-DD"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "identifier": {
+                        "type": "string",
+                        "format": "string"
                     }
                 }
             }
