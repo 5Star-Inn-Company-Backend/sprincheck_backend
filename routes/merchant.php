@@ -11,8 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class])->group(function () {
-//Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class, MerchantSignatureCheck::class])->group(function () {
+Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class, MerchantSignatureCheck::class])->group(function () {
+
     Route::post('bvn', [BVNController::class, 'merchant']);
 
     Route::post('nin', [NINController::class, 'merchant']);
