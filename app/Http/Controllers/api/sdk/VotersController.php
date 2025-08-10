@@ -23,7 +23,7 @@ class VotersController extends Controller
     {
         $input = $request->all();
         $rules = array(
-            'number' => 'required|digits:11'
+            'number' => 'required'
         );
 
         $validator = Validator::make($input, $rules);
@@ -40,34 +40,28 @@ class VotersController extends Controller
 //            return response()->json(['success' => 0, 'message' => 'Identifier already exist. Kindly try again with a unique identifier']);
 //        }
 
-        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"BVN");
+        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"VOTERS");
 
         if($fee > $biz->wallet){
             return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
         }
 
-        $kyc=Kyc::where('bvn', $input['number'])->first();
+        $kyc=KycVoters::where('number', $input['number'])->first();
 
         if($kyc){
-            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'BVN_VERIFICATION');
+            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'VOTERS_VERIFICATION');
 
             $resp=json_decode($kyc->data,true);
             return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['base64Image'], 'reference' =>$kyc->reference]]);
-        }
-
-
-        // Check if number starts with 0 or 1
-        if (preg_match('/^[01]/', $input['number'])) {
-            return response()->json(['success' => 0, 'message' => 'Invalid number: cannot start with 0 or 1.']);
         }
 
         Log::info("Running Kyc check on ".$input['number']);
 
         try {
             $userService = new PremblyService();
-            $data=$userService->bvn($input['number'],$biz->id);
+            $data=$userService->voters($input['number'],$biz->id);
 
-            ServiceDebitJob::dispatch($fee, $data['reference'],$biz, 'BVN_VERIFICATION');
+            ServiceDebitJob::dispatch($fee, $data['reference'],$biz, 'VOTERS_VERIFICATION');
 
             return response()->json(['success' => 1, 'message' => 'Verified Successfully',  'confidence_level'=>$biz->confidence_level, 'data' => $data]);
 
@@ -94,7 +88,7 @@ class VotersController extends Controller
             return response()->json(['success' => 0, 'message' => implode(",", $validator->errors()->all())]);
         }
 
-        $kyc=Kyc::where([['bvn', $input['number']],['reference', $input['reference']]])->first();
+        $kyc=KycVoters::where([['number', $input['number']],['reference', $input['reference']]])->first();
 
         if(!$kyc){
             return response()->json(['success' => 0, 'message' => 'Kindly provide valid Kyc']);

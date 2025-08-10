@@ -232,7 +232,7 @@ class PremblyService
 
             curl_close($curl);
 
-            Log::info("PREMBLY VERIFICATION");
+            Log::info("PREMBLY VERIFICATION VOTERS");
             Log::info($payload);
             Log::info($response);
 

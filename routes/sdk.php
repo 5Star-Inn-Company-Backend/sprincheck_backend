@@ -3,6 +3,7 @@
 use App\Http\Controllers\api\sdk\BVNController;
 use App\Http\Controllers\api\sdk\FacialController;
 use App\Http\Controllers\api\sdk\NINController;
+use App\Http\Controllers\api\sdk\VotersController;
 use App\Http\Middleware\MerchantSignatureCheck;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,4 +18,7 @@ Route::prefix('sdk')->middleware([\App\Http\Middleware\MerchantApiKey::class, Me
 
     Route::post('facial', [FacialController::class, 'check']);
     Route::put('facial', [FacialController::class, 'sdk_resp'])->withoutMiddleware([MerchantSignatureCheck::class]);
+
+    Route::post('voters', [VotersController::class, 'check']);
+    Route::put('voters', [VotersController::class, 'sdk_resp'])->withoutMiddleware([MerchantSignatureCheck::class]);
 });
