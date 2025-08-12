@@ -52,7 +52,7 @@ class VotersController extends Controller
             ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'VOTERS_VERIFICATION');
 
             $resp=json_decode($kyc->data,true);
-            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['base64Image'], 'reference' =>$kyc->reference]]);
+            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['photo'], 'reference' =>$kyc->reference]]);
         }
 
         Log::info("Running Kyc check on ".$input['number']);
@@ -75,7 +75,7 @@ class VotersController extends Controller
     {
         $input = $request->all();
         $rules = array(
-            'number' => 'required|digits:11',
+            'number' => 'required',
             'reference' => 'required',
             'image' => 'required',
             'confidence' => 'required',
