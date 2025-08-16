@@ -32,6 +32,10 @@
         {
             "name": "Document Verification",
             "description": "Document Verification"
+        },
+        {
+            "name": "Facial Verification",
+            "description": "Facial Verification"
         }
     ],
     "paths": {
@@ -279,6 +283,117 @@
                     }
                 ]
             }
+        },
+        "/face_detection": {
+            "post": {
+                "tags": [
+                    "Facial Verification"
+                ],
+                "summary": "Verify Face(s) (Beta) *Free",
+                "operationId": "verifyface",
+                "description": "Verify Face(s). You can convert your images to base64 and pass them as a string using https://base64.guru/converter/encode/image",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FaceRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/face_liveness": {
+            "post": {
+                "tags": [
+                    "Facial Verification"
+                ],
+                "summary": "Face(s) Liveness Check (Beta)",
+                "operationId": "facelivenewss",
+                "description": "Face(s) Liveness Check. You can convert your images to base64 and pass them as a string using https://base64.guru/converter/encode/image",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FaceRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/face_compare": {
+            "post": {
+                "tags": [
+                    "Facial Verification"
+                ],
+                "summary": "Compare Faces (Beta)",
+                "operationId": "compareface",
+                "description": "Your images should be less than 500kb in size. Visit https://www.reduceimages.com to reduce your image size.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompareFaceRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -372,6 +487,35 @@
                         "format": "string"
                     },
                     "identifier": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                }
+            },
+            "FaceRequest": {
+                "type": "object",
+                "required": [
+                    "image"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                }
+            },
+            "CompareFaceRequest": {
+                "type": "object",
+                "required": [
+                    "image1",
+                    "image2"
+                ],
+                "properties": {
+                    "image1": {
+                        "type": "string",
+                        "format": "string"
+                    },
+                    "image2": {
                         "type": "string",
                         "format": "string"
                     }
