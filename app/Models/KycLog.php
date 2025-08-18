@@ -31,4 +31,26 @@ class KycLog extends Model
     {
       return $this->belongsTo(Kyc::class,'kyc_id')->select('id','data');
     }
+
+    function dlicense()
+    {
+      return $this->belongsTo(KycDriversLicense::class,'kyc_id')->select('id','data');
+    }
+    function passport()
+    {
+      return $this->belongsTo(KycPassport::class,'kyc_id')->select('id','data');
+    }
+    function voters()
+    {
+      return $this->belongsTo(KycVoters::class,'kyc_id')->select('id','data');
+    }
+    function facevers()
+    {
+      return $this->belongsTo(KycFaceVerification::class,'kyc_id')->select('id','data');
+    }
+
+    function facial()
+    {
+      return $this->belongsTo(KycFace::class,'kyc_id')->select('id','source_image');
+    }
 }

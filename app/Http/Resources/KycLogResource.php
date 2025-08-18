@@ -20,6 +20,16 @@ class KycLogResource extends JsonResource
             $kyc_info = $log->bvn->data;
         } elseif ($log->type === 'NIN VERIFICATION') {
             $kyc_info = $log->nin->data;
+        } elseif ($log->type === 'DRIVERLICENSE VERIFICATION') {
+            $kyc_info = $log->dlicense->data;
+        } elseif ($log->type === 'PASSPORT VERIFICATION') {
+            $kyc_info = $log->passport->data;
+        } elseif ($log->type === 'VOTERS VERIFICATION') {
+            $kyc_info = $log->voters->data;
+        } elseif ($log->type === 'FACE LIVENESS' || $log->type === 'FACE DETECTION' || $log->type === 'FACE COMPARE') {
+            $kyc_info = $log->facevers->data;
+//        } elseif ($log->type === 'FACIAL VERIFICATION') {
+//            $kyc_info = $log->facial->source_image;
         }
 
         return [
