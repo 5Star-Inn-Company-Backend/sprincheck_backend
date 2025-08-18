@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Business;
+use App\Models\PndL;
 use App\Models\WalletTracker;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -46,5 +47,15 @@ class ServiceDebitJob implements ShouldQueue
 
         $this->biz->wallet-=$this->fee;
         $this->biz->save();
+
+        if($this->fee > 0) {
+            $pnl["type"] = "income";
+            $pnl["gl"] = $this->description;
+            $pnl["amount"] = $this->fee;
+            $pnl['status'] = 'successful';
+            $pnl["narration"] = "Being amount charged for using " . $this->description . " from " . $this->biz->name . " (" . $this->biz->id . ")" . " with ref " . $this->reference;
+
+            PndL::create($pnl);
+        }
     }
 }

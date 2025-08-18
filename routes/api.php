@@ -33,5 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/change-password', [DashboardController::class, 'changePassword']);
 });
 
+Route::post('/hook/paylony', [\App\Http\Controllers\api\PaylonyHookController::class, 'index']);
+
+
 require_once 'sdk.php';
 require_once 'merchant.php';
