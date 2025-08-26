@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\KycLogResource;
 use App\Models\Business;
 use App\Models\KycLog;
+use App\Models\TransactionFee;
 use App\Models\VirtualAccount;
 use App\Models\WalletTracker;
 use Carbon\Carbon;
@@ -476,6 +477,31 @@ class DashboardController extends Controller
             'status' => true,
             'message' => 'Business Keys regenerated successfully',
             'data' => $business
+        ]);
+    }
+
+    public function pricing(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->business;
+
+        $trans_fees=TransactionFee::where(["business_id" => 0, 'status' =>1])->get();
+
+        // Format the response
+        $graphData = [];
+        foreach ($trans_fees as $stat) {
+            $bizf=TransactionFee::where(["business_id" => $business->id, 'service' => $stat->service, 'status' =>1])->first();
+            if($bizf){
+                $graphData[] = $bizf;
+            }else{
+                $graphData[] = $stat;
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Pricing Fetched successfully',
+            'data' => $graphData
         ]);
     }
 }

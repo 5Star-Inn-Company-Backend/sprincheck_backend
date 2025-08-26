@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [DashboardController::class, 'updateProfile']);
     Route::put('/business', [DashboardController::class, 'updateBusinessInfo']);
     Route::put('/change-password', [DashboardController::class, 'changePassword']);
+    Route::get('/pricing', [DashboardController::class, 'pricing']);
 });
 
 Route::post('/hook/paylony', [\App\Http\Controllers\api\PaylonyHookController::class, 'index']);
