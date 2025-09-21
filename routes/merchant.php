@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\sdk\BVNController;
+use App\Http\Controllers\api\sdk\CACController;
 use App\Http\Controllers\api\sdk\DriverLicenseController;
 use App\Http\Controllers\api\sdk\FaceRecognitionController;
 use App\Http\Controllers\api\sdk\FacialController;
@@ -29,4 +30,7 @@ Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class, Mer
     Route::post('face_detection', [FaceRecognitionController::class, 'merchant'])->withoutMiddleware([MerchantSignatureCheck::class]);
     Route::post('face_compare', [FaceRecognitionController::class, 'merchant_compare'])->withoutMiddleware([MerchantSignatureCheck::class]);
     Route::post('face_liveness', [FaceRecognitionController::class, 'merchant_liveness'])->withoutMiddleware([MerchantSignatureCheck::class]);
+
+    Route::post('cac/name', [CACController::class, 'byname'])->withoutMiddleware([MerchantSignatureCheck::class]);
+    Route::post('cac/shareholders', [CACController::class, 'shareHolders'])->withoutMiddleware([MerchantSignatureCheck::class]);
 });

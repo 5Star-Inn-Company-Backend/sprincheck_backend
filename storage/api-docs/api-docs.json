@@ -36,6 +36,10 @@
         {
             "name": "Facial Verification",
             "description": "Facial Verification"
+        },
+        {
+            "name": "Business Verification",
+            "description": "Business Verification"
         }
     ],
     "paths": {
@@ -394,6 +398,80 @@
                     }
                 ]
             }
+        },
+        "/cac/name": {
+            "post": {
+                "tags": [
+                    "Business Verification"
+                ],
+                "summary": "Search CAC Registered Names",
+                "operationId": "cacName",
+                "description": "Search CAC Registered Names",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CacNameRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cac/shareholders": {
+            "post": {
+                "tags": [
+                    "Business Verification"
+                ],
+                "summary": "Fetch Shareholders of CAC Registered Business",
+                "operationId": "cacShareholders",
+                "description": "Fetch Shareholders of CAC Registered Business. You are to get the Business ID number from the /cac/name endpoint e.g id: 8798230",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CacShareholderRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -518,6 +596,30 @@
                     "image2": {
                         "type": "string",
                         "format": "string"
+                    }
+                }
+            },
+            "CacNameRequest": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "format": "string"
+                    }
+                }
+            },
+            "CacShareholderRequest": {
+                "type": "object",
+                "required": [
+                    "biz_id"
+                ],
+                "properties": {
+                    "biz_id": {
+                        "type": "number",
+                        "format": "number"
                     }
                 }
             }

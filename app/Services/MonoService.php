@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Kyc;
+use App\Models\Kyccac;
+use App\Models\KyccacShareholder;
 use App\Models\KycDriversLicense;
 use App\Models\KycNIN;
 use Illuminate\Support\Facades\Auth;
@@ -147,6 +149,147 @@ class MonoService
 
         } catch (\Exception $e) {
             Log::info("Error encountered on Mono account verification on " . $number);
+            Log::info($e);
+
+            throw new \Exception('Unable to verify try again later.');
+        }
+    }
+
+    public function cacName($name, $user_id, $type="sdk"){
+
+
+        $url=env("MOMO_URL", 'https://api.withmono.com')."/v3/lookup/cac?search=".urlencode($name);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+//                CURLOPT_HEADER => 1,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'mono-sec-key:' . env('MONO_SECRETKEY'),
+                'Accept: application/json',
+                'Content-Type: application/json'
+            ),
+        ));
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+
+        Log::info("CAC MONO VERIFICATION");
+        Log::info($url);
+        Log::info($response);
+
+        if($response == null){
+            throw new \Exception("Search currently not available. Kindly try again or reach out to customer support if issue persists.");
+        }
+
+        $resp = json_decode($response, true);
+
+        if($resp['status'] != "successful"){
+            throw new \Exception("We couldn't find any matching records based on the information you provided. Please double-check the parameters you passed and try again");
+        }
+
+        try {
+            $ref=uniqid()."-".time();
+
+            $k=Kyccac::create([
+                "user_id" => $user_id,
+                "reference" => $ref,
+                "name" => $name,
+                "source" => "MONO",
+                "data" => json_encode($resp['data']),
+            ]);
+
+            if($type == "sdk"){
+                throw new \Exception('SDK not supported.');
+            }else{
+                return ['kyc' => $k, 'data' => $resp['data']] ;
+            }
+
+        } catch (\Exception $e) {
+            Log::info("Error encountered on Mono account verification on " . $name);
+            Log::info($e);
+
+            throw new \Exception('Unable to verify try again later.');
+        }
+    }
+
+    public function cacShareHolders($bizID, $user_id, $type="sdk"){
+
+
+        $url=env("MOMO_URL", 'https://api.withmono.com')."/v3/lookup/cac/company/$bizID";
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+//                CURLOPT_HEADER => 1,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'mono-sec-key:' . env('MONO_SECRETKEY'),
+                'Accept: application/json',
+                'Content-Type: application/json'
+            ),
+        ));
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+
+        Log::info("CAC_SHAREHOLDERS MONO VERIFICATION");
+        Log::info($url);
+        Log::info($response);
+
+        if($response == null){
+            throw new \Exception("Search currently not available. Kindly try again or reach out to customer support if issue persists.");
+        }
+
+
+        $resp = json_decode($response, true);
+
+            if($resp['status'] != "successful"){
+                throw new \Exception("We couldn't find any matching records based on the information you provided. Please double-check the parameters you passed and try again");
+            }
+
+        try {
+            $ref=uniqid()."-".time();
+
+            $k=KyccacShareholder::create([
+                "user_id" => $user_id,
+                "reference" => $ref,
+                "biz_id" => $bizID,
+                "source" => "MONO",
+                "data" => json_encode($resp['data']),
+            ]);
+
+            if($type == "sdk"){
+                throw new \Exception('SDK not supported.');
+            }else{
+                return ['kyc' => $k, 'data' => $resp['data']] ;
+            }
+
+        } catch (\Exception $e) {
+            Log::info("Error encountered on Mono cacShareHolders verification on " . $bizID);
             Log::info($e);
 
             throw new \Exception('Unable to verify try again later.');
