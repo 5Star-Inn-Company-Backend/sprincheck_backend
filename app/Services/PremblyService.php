@@ -56,13 +56,13 @@ class PremblyService
             $k=Kyc::create([
                 "user_id" => $user_id,
                 "bvn" => $number,
-                "reference" => $resp['verification']['reference'],
+                "reference" => $resp['billing_info']['transaction_id'],
                 "name" => $name,
                 "data" => json_encode($resp['data']),
             ]);
 
             if($type == "sdk"){
-                return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['verification']['reference']];
+                return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['billing_info']['transaction_id']];
             }else{
                 return ['kyc' => $k, 'data' => $resp['data']] ;
             }
@@ -119,13 +119,13 @@ class PremblyService
             $k=KycNIN::create([
                 "user_id" => $user_id,
                 "nin" => $number,
-                "reference" => $resp['verification']['reference'],
+                "reference" => $resp['billing_info']['transaction_id'],
                 "name" => $name,
                 "data" => json_encode($resp['nin_data']),
             ]);
 
             if($type == "sdk"){
-                return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['verification']['reference']];
+                return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['billing_info']['transaction_id']];
             }else{
                 return ['kyc' => $k, 'data' => $resp['nin_data']] ;
             }
@@ -183,7 +183,7 @@ class PremblyService
             $k=KycPassport::create([
                 "user_id" => $user_id,
                 "number" => $number,
-                "reference" => $resp['verification']['reference'],
+                "reference" => $resp['billing_info']['transaction_id'],
                 "name" => $name,
                 "data" => json_encode($resp['data']),
             ]);
@@ -246,13 +246,13 @@ class PremblyService
             $k=KycVoters::create([
                 "user_id" => $user_id,
                 "number" => $number,
-                "reference" => $resp['verification']['reference'],
+                "reference" => $resp['billing_info']['transaction_id'],
                 "name" => $name,
                 "data" => json_encode($resp['data']),
             ]);
 
             if($type == "sdk"){
-                return  ['image' => $resp['data']['photo'], 'reference' =>$resp['verification']['reference']];
+                return  ['image' => $resp['data']['photo'], 'reference' =>$resp['billing_info']['transaction_id']];
             }else{
                 return ['kyc' => $k, 'data' => $resp['data']] ;
             }
