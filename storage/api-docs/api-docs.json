@@ -472,6 +472,117 @@
                     }
                 ]
             }
+        },
+        "/cac/directors": {
+            "post": {
+                "tags": [
+                    "Business Verification"
+                ],
+                "summary": "Fetch Directors of CAC Registered Business",
+                "operationId": "cacDirectors",
+                "description": "Fetch Directors of CAC Registered Business. You are to get the Business ID number from the /cac/name endpoint e.g id: 8798230",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CacShareholderRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cac/profile": {
+            "post": {
+                "tags": [
+                    "Business Verification"
+                ],
+                "summary": "Fetch Directors of CAC Registered Business",
+                "operationId": "cacProfile",
+                "description": "Fetch Registered Business Profile via RC Number. The result is a combination of the company search, shareholders and directors information.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CacTinRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/cac/tin": {
+            "post": {
+                "tags": [
+                    "Business Verification"
+                ],
+                "summary": "It verifies the tax identification number of an entity.",
+                "operationId": "cacTin",
+                "description": "It verifies the tax identification number of an entity via TIN Number.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CacTinRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyBvnResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -620,6 +731,18 @@
                     "biz_id": {
                         "type": "number",
                         "format": "number"
+                    }
+                }
+            },
+            "CacTinRequest": {
+                "type": "object",
+                "required": [
+                    "number"
+                ],
+                "properties": {
+                    "number": {
+                        "type": "string",
+                        "format": "string"
                     }
                 }
             }

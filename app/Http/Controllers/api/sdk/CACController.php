@@ -270,6 +270,182 @@ class CACController extends Controller
 
         return response()->json(['success' => 1, 'message' => 'Fetch Successful', 'data' => $data]);
     }
+    public function directors(Request $request)
+    {
+        $input = $request->all();
+        $rules = array(
+            'biz_id' => 'required'
+        );
+
+        $validator = Validator::make($input, $rules);
+
+        if (!$validator->passes()) {
+            return response()->json(['success' => 0, 'message' => implode(",", $validator->errors()->all())]);
+        }
+
+        $reference=Str::uuid();
+        $biz=$request->get('biz')->refresh();
+
+        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"CAC_DIRECTORS");
+
+        if($fee > $biz->wallet){
+            return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
+        }
+
+        Log::info("Running CAC_DIRECTORS on ".$input['biz_id']);
+
+        try {
+            $userService = new MonoService();
+            $res=$userService->cacDirectors($input['biz_id'],$biz->id,"API");
+            $kyc=$res['kyc'];
+            $data=$res['data'];
+
+        } catch (\Exception $e) {
+            Log::error("Error on CAC by Name", [$e]);
+            return response()->json(['success' => 0, 'message' => $e->getMessage()]);
+        }
+
+
+        $k=KycLog::create([
+            'kyc_id' => $kyc->id,
+            'business_id' => $biz->id,
+            'user_id' => $request->get('user')->id,
+            'billing_id' => 1,
+            'type' => 'CAC DIRECTORS',
+            'source' => 'API',
+            'status' =>"1",
+            'confidence' => "0",
+            'identifier' => $reference,
+            'reference' => $reference,
+            'image' => ""
+        ]);
+
+//        if($biz->webhook_url) {
+//            WebhookNotificationJob::dispatch($k, $input['name']);
+//        }
+
+        ServiceDebitJob::dispatch($fee, $reference,$biz, 'CAC DIRECTORS');
+
+        return response()->json(['success' => 1, 'message' => 'Fetch Successful', 'data' => $data]);
+    }
+
+    public function profile(Request $request)
+    {
+        $input = $request->all();
+        $rules = array(
+            'number' => 'required'
+        );
+
+        $validator = Validator::make($input, $rules);
+
+        if (!$validator->passes()) {
+            return response()->json(['success' => 0, 'message' => implode(",", $validator->errors()->all())]);
+        }
+
+        $reference=Str::uuid();
+        $biz=$request->get('biz')->refresh();
+
+        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"CAC_PROFILE");
+
+        if($fee > $biz->wallet){
+            return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
+        }
+
+        Log::info("Running CAC_PROFILE on ".$input['number']);
+
+        try {
+            $userService = new MonoService();
+            $res=$userService->cacProfile($input['number'],$biz->id,"API");
+            $kyc=$res['kyc'];
+            $data=$res['data'];
+
+        } catch (\Exception $e) {
+            Log::error("Error on CAC by rc", [$e]);
+            return response()->json(['success' => 0, 'message' => $e->getMessage()]);
+        }
+
+
+        $k=KycLog::create([
+            'kyc_id' => $kyc->id,
+            'business_id' => $biz->id,
+            'user_id' => $request->get('user')->id,
+            'billing_id' => 1,
+            'type' => 'CAC PROFILE',
+            'source' => 'API',
+            'status' =>"1",
+            'confidence' => "0",
+            'identifier' => $reference,
+            'reference' => $reference,
+            'image' => ""
+        ]);
+
+//        if($biz->webhook_url) {
+//            WebhookNotificationJob::dispatch($k, $input['name']);
+//        }
+
+        ServiceDebitJob::dispatch($fee, $reference,$biz, 'CAC PROFILE');
+
+        return response()->json(['success' => 1, 'message' => 'Fetch Successful', 'data' => $data]);
+    }
+
+    public function tin(Request $request)
+    {
+        $input = $request->all();
+        $rules = array(
+            'number' => 'required'
+        );
+
+        $validator = Validator::make($input, $rules);
+
+        if (!$validator->passes()) {
+            return response()->json(['success' => 0, 'message' => implode(",", $validator->errors()->all())]);
+        }
+
+        $reference=Str::uuid();
+        $biz=$request->get('biz')->refresh();
+
+        $fee= (new \App\Models\TransactionFee)->getTransactionFee($biz->id,"TIN");
+
+        if($fee > $biz->wallet){
+            return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
+        }
+
+        Log::info("Running TIN on ".$input['number']);
+
+        try {
+            $userService = new MonoService();
+            $res=$userService->tin($input['number'],$biz->id,"API");
+            $kyc=$res['kyc'];
+            $data=$res['data'];
+
+        } catch (\Exception $e) {
+            Log::error("Error on TIN by", [$e]);
+            return response()->json(['success' => 0, 'message' => $e->getMessage()]);
+        }
+
+
+        $k=KycLog::create([
+            'kyc_id' => $kyc->id,
+            'business_id' => $biz->id,
+            'user_id' => $request->get('user')->id,
+            'billing_id' => 1,
+            'type' => 'TIN',
+            'source' => 'API',
+            'status' =>"1",
+            'confidence' => "0",
+            'identifier' => $reference,
+            'reference' => $reference,
+            'image' => ""
+        ]);
+
+//        if($biz->webhook_url) {
+//            WebhookNotificationJob::dispatch($k, $input['name']);
+//        }
+
+        ServiceDebitJob::dispatch($fee, $reference,$biz, 'TIN');
+
+        return response()->json(['success' => 1, 'message' => 'Fetch Successful', 'data' => $data]);
+    }
 
     public function byrc(Request $request)
     {

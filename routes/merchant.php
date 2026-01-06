@@ -33,4 +33,7 @@ Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class, Mer
 
     Route::post('cac/name', [CACController::class, 'byname'])->withoutMiddleware([MerchantSignatureCheck::class]);
     Route::post('cac/shareholders', [CACController::class, 'shareHolders'])->withoutMiddleware([MerchantSignatureCheck::class]);
+    Route::post('cac/directors', [CACController::class, 'directors'])->withoutMiddleware([MerchantSignatureCheck::class]);
+    Route::post('cac/profile', [CACController::class, 'profile'])->withoutMiddleware([MerchantSignatureCheck::class]);
+    Route::post('cac/tin', [CACController::class, 'tin'])->withoutMiddleware([MerchantSignatureCheck::class]);
 });

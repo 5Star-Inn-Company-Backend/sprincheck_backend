@@ -47,32 +47,32 @@ class PremblyService
             Log::info($response);
 
             $resp = json_decode($response, true);
-
-            if(!$resp['status']){
-                throw new \Exception('Verification Failed. Kindly provide valid BVN');
-            }
-
-            $name=$resp['data']['lastName'] . " " .$resp['data']['firstName'] . " " .$resp['data']['middleName'];
-            $k=Kyc::create([
-                "user_id" => $user_id,
-                "bvn" => $number,
-                "reference" => $resp['billing_info']['transaction_id'],
-                "name" => $name,
-                "data" => json_encode($resp['data']),
-            ]);
-
-            if($type == "sdk"){
-                return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['billing_info']['transaction_id']];
-            }else{
-                return ['kyc' => $k, 'data' => $resp['data']] ;
-            }
-
         } catch (\Exception $e) {
             Log::info("Error encountered on Prembly account verification on " . $number);
             Log::info($e);
 
             throw new \Exception('Unable to verify try again later.');
         }
+
+        if(!$resp['status']){
+            throw new \Exception('Verification Failed. Kindly provide valid BVN');
+        }
+
+        $name=$resp['data']['lastName'] . " " .$resp['data']['firstName'] . " " .$resp['data']['middleName'];
+        $k=Kyc::create([
+            "user_id" => $user_id,
+            "bvn" => $number,
+            "reference" => $resp['billing_info']['transaction_id'],
+            "name" => $name,
+            "data" => json_encode($resp['data']),
+        ]);
+
+        if($type == "sdk"){
+            return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['billing_info']['transaction_id']];
+        }else{
+            return ['kyc' => $k, 'data' => $resp['data']] ;
+        }
+
     }
 
     public function nin($number, $user_id, $type="sdk"){
@@ -111,30 +111,30 @@ class PremblyService
 
             $resp = json_decode($response, true);
 
-            if(!$resp['status']){
-                throw new \Exception('Verification Failed. Kindly provide valid NIN');
-            }
-
-            $name=$resp['nin_data']['surname'] . " " .$resp['nin_data']['firstname'] . " " .$resp['nin_data']['middlename'];
-            $k=KycNIN::create([
-                "user_id" => $user_id,
-                "nin" => $number,
-                "reference" => $resp['billing_info']['transaction_id'],
-                "name" => $name,
-                "data" => json_encode($resp['nin_data']),
-            ]);
-
-            if($type == "sdk"){
-                return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['billing_info']['transaction_id']];
-            }else{
-                return ['kyc' => $k, 'data' => $resp['nin_data']] ;
-            }
-
         } catch (\Exception $e) {
             Log::info("Error encountered on Prembly account verification on " . $number);
             Log::info($e);
 
             throw new \Exception('Unable to verify try again later.');
+        }
+
+        if(!$resp['status']){
+            throw new \Exception('Verification Failed. Kindly provide valid NIN');
+        }
+
+        $name=$resp['nin_data']['surname'] . " " .$resp['nin_data']['firstname'] . " " .$resp['nin_data']['middlename'];
+        $k=KycNIN::create([
+            "user_id" => $user_id,
+            "nin" => $number,
+            "reference" => $resp['billing_info']['transaction_id'],
+            "name" => $name,
+            "data" => json_encode($resp['nin_data']),
+        ]);
+
+        if($type == "sdk"){
+            return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['billing_info']['transaction_id']];
+        }else{
+            return ['kyc' => $k, 'data' => $resp['nin_data']] ;
         }
     }
     public function passport($number, $dob, $user_id, $type="sdk"){
@@ -175,30 +175,30 @@ class PremblyService
 
             $resp = json_decode($response, true);
 
-            if(!$resp['status']){
-                throw new \Exception('Verification Failed. Kindly provide valid Details for Passport');
-            }
-
-            $name=$resp['data']['currentLastName'] . " " .$resp['data']['currentFirstName'] . " " .$resp['data']['currentMiddleName'];
-            $k=KycPassport::create([
-                "user_id" => $user_id,
-                "number" => $number,
-                "reference" => $resp['billing_info']['transaction_id'],
-                "name" => $name,
-                "data" => json_encode($resp['data']),
-            ]);
-
-            if($type == "sdk"){
-                throw new \Exception('SDK not supported.');
-            }else{
-                return ['kyc' => $k, 'data' => $resp['data']] ;
-            }
-
         } catch (\Exception $e) {
             Log::info("Error encountered on Prembly account verification on " . $number);
             Log::info($e);
 
             throw new \Exception('Unable to verify try again later.');
+        }
+
+        if(!$resp['status']){
+            throw new \Exception('Verification Failed. Kindly provide valid Details for Passport');
+        }
+
+        $name=$resp['data']['currentLastName'] . " " .$resp['data']['currentFirstName'] . " " .$resp['data']['currentMiddleName'];
+        $k=KycPassport::create([
+            "user_id" => $user_id,
+            "number" => $number,
+            "reference" => $resp['billing_info']['transaction_id'],
+            "name" => $name,
+            "data" => json_encode($resp['data']),
+        ]);
+
+        if($type == "sdk"){
+            throw new \Exception('SDK not supported.');
+        }else{
+            return ['kyc' => $k, 'data' => $resp['data']] ;
         }
     }
 
