@@ -31,9 +31,9 @@ Route::prefix('v1')->middleware([\App\Http\Middleware\MerchantApiKey::class, Mer
     Route::post('face_compare', [FaceRecognitionController::class, 'merchant_compare'])->withoutMiddleware([MerchantSignatureCheck::class]);
     Route::post('face_liveness', [FaceRecognitionController::class, 'merchant_liveness'])->withoutMiddleware([MerchantSignatureCheck::class]);
 
-    Route::post('cac/name', [CACController::class, 'byname'])->withoutMiddleware([MerchantSignatureCheck::class]);
-    Route::post('cac/shareholders', [CACController::class, 'shareHolders'])->withoutMiddleware([MerchantSignatureCheck::class]);
-    Route::post('cac/directors', [CACController::class, 'directors'])->withoutMiddleware([MerchantSignatureCheck::class]);
-    Route::post('cac/profile', [CACController::class, 'profile'])->withoutMiddleware([MerchantSignatureCheck::class]);
-    Route::post('cac/tin', [CACController::class, 'tin'])->withoutMiddleware([MerchantSignatureCheck::class]);
+    Route::post('cac/name', [CACController::class, 'byname']);
+    Route::post('cac/shareholders', [CACController::class, 'shareHolders']);
+    Route::post('cac/directors', [CACController::class, 'directors']);
+    Route::post('cac/profile', [CACController::class, 'profile']);
+    Route::post('cac/tin', [CACController::class, 'tin']);
 });
