@@ -58,19 +58,21 @@ class PremblyService
             throw new \Exception('Verification Failed. Kindly provide valid BVN');
         }
 
-        $name=$resp['data']['lastName'] . " " .$resp['data']['firstName'] . " " .$resp['data']['middleName'];
+        $name=$resp['bvn_data']['lastName'] . " " .$resp['bvn_data']['firstName'] . " " .$resp['bvn_data']['middleName'];
+
+        $ref=$resp['billing_info']['transaction_id'] ?? $resp['transaction_id'];
         $k=Kyc::create([
             "user_id" => $user_id,
             "bvn" => $number,
-            "reference" => $resp['billing_info']['transaction_id'],
+            "reference" => $ref,
             "name" => $name,
-            "data" => json_encode($resp['data']),
+            "data" => json_encode($resp['bvn_data']),
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['data']['base64Image'], 'reference' =>$resp['billing_info']['transaction_id']];
+            return  ['image' => $resp['bvn_data']['base64Image'], 'reference' =>$ref];
         }else{
-            return ['kyc' => $k, 'data' => $resp['data']] ;
+            return ['kyc' => $k, 'data' => $resp['bvn_data']] ;
         }
 
     }
@@ -123,16 +125,18 @@ class PremblyService
         }
 
         $name=$resp['nin_data']['surname'] . " " .$resp['nin_data']['firstname'] . " " .$resp['nin_data']['middlename'];
+        $ref=$resp['billing_info']['transaction_id'] ?? $resp['transaction_id'];
+
         $k=KycNIN::create([
             "user_id" => $user_id,
             "nin" => $number,
-            "reference" => $resp['billing_info']['transaction_id'],
+            "reference" => $ref,
             "name" => $name,
             "data" => json_encode($resp['nin_data']),
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['nin_data']['photo'], 'reference' =>$resp['billing_info']['transaction_id']];
+            return  ['image' => $resp['nin_data']['photo'], 'reference' =>$ref];
         }else{
             return ['kyc' => $k, 'data' => $resp['nin_data']] ;
         }
