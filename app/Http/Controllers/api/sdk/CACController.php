@@ -7,10 +7,12 @@ use App\Jobs\ServiceDebitJob;
 use App\Jobs\WebhookNotificationJob;
 use App\Models\KycLog;
 use App\Models\KycNIN;
+use App\Notifications\NotifyAdmin;
 use App\Services\MonoService;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -185,6 +187,9 @@ class CACController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Error on CAC by Name", [$e]);
+            $ni['title'] = "Sprint Check Error on CAC Name Search";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 
@@ -243,7 +248,10 @@ class CACController extends Controller
             $data=$res['data'];
 
         } catch (\Exception $e) {
-            Log::error("Error on CAC by Name", [$e]);
+            Log::error("Error on CAC Shareholders", [$e]);
+            $ni['title'] = "Sprint Check Error on CAC Shareholders";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 
@@ -302,6 +310,9 @@ class CACController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Error on CAC by Name", [$e]);
+            $ni['title'] = "Sprint Check Error on CAC Directors";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 
@@ -361,6 +372,9 @@ class CACController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Error on CAC by rc", [$e]);
+            $ni['title'] = "Sprint Check Error on CAC Profile";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 
@@ -420,6 +434,9 @@ class CACController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Error on TIN by", [$e]);
+            $ni['title'] = "Sprint Check Error on TIN";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 

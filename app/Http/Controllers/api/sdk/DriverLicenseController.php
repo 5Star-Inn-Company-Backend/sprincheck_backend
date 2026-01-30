@@ -9,10 +9,12 @@ use App\Models\Kyc;
 use App\Models\KycDriversLicense;
 use App\Models\KycLog;
 use App\Models\KycPassport;
+use App\Notifications\NotifyAdmin;
 use App\Services\MonoService;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -196,6 +198,9 @@ class DriverLicenseController extends Controller
                 $data=$res['data'];
             } catch (\Exception $e) {
                 Log::error("Error on DRIVERLICENSE_VERIFICATION", [$e]);
+                $ni['title'] = "Sprint Check Error on DriverLicense Verification";
+                $ni['message'] = "$e";
+                Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
                 return response()->json(['success' => 0, 'message' => $e->getMessage()]);
             }
         }

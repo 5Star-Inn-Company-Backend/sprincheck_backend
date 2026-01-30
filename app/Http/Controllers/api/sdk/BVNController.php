@@ -7,9 +7,11 @@ use App\Jobs\ServiceDebitJob;
 use App\Jobs\WebhookNotificationJob;
 use App\Models\Kyc;
 use App\Models\KycLog;
+use App\Notifications\NotifyAdmin;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -69,6 +71,10 @@ class BVNController extends Controller
             return response()->json(['success' => 1, 'message' => 'Verified Successfully',  'confidence_level'=>$biz->confidence_level, 'data' => $data]);
 
         } catch (\Exception $e) {
+            Log::error("Error on BVN SDK", [$e]);
+            $ni['title'] = "Sprint Check Error on BVN SDK";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 
@@ -137,7 +143,9 @@ class BVNController extends Controller
 
         } catch (\Exception $e) {
             Log::info("Error encountered when updating  on " . $e);
-            Log::info($e);
+            $ni['title'] = "Sprint Check Error on BVN SDK Verify";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
 
             return response()->json(['success' => 0, 'message' => 'Unable to verify try again later.']);
         }
@@ -196,6 +204,9 @@ class BVNController extends Controller
 
             } catch (\Exception $e) {
                 Log::error("Error on BVN", [$e]);
+                $ni['title'] = "Sprint Check Error on BVN";
+                $ni['message'] = "$e";
+                Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
                 return response()->json(['success' => 0, 'message' => $e->getMessage()]);
             }
         }

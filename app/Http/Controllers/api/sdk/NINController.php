@@ -7,10 +7,12 @@ use App\Jobs\ServiceDebitJob;
 use App\Jobs\WebhookNotificationJob;
 use App\Models\KycLog;
 use App\Models\KycNIN;
+use App\Notifications\NotifyAdmin;
 use App\Services\MonoService;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -77,6 +79,10 @@ class NINController extends Controller
             return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => $data]);
 
         } catch (\Exception $e) {
+            Log::error("Error on NIN check", [$e]);
+            $ni['title'] = "Sprint Check Error on NIN Check";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
             return response()->json(['success' => 0, 'message' => $e->getMessage()]);
         }
 
@@ -145,8 +151,10 @@ class NINController extends Controller
             return response()->json(['success' => 1, 'message' => 'Recorded Successfully', 'data' => $kyc->name]);
 
         } catch (\Exception $e) {
-            Log::info("Error encountered when updating  on " . $e);
-            Log::info($e);
+            Log::info("Error encountered when updating NIN  on " . $e);
+            $ni['title'] = "Sprint Check Error on NIN SDK";
+            $ni['message'] = "$e";
+            Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
 
             return response()->json(['success' => 0, 'message' => 'Unable to verify try again later.']);
         }
@@ -211,6 +219,9 @@ class NINController extends Controller
 
             } catch (\Exception $e) {
                 Log::error("Error on NIN", [$e]);
+                $ni['title'] = "Sprint Check Error on NIN";
+                $ni['message'] = "$e";
+                Notification::route('slack', env('SLACK_WEBHOOK'))->notify(new NotifyAdmin($ni['title'],$ni['message']));
                 return response()->json(['success' => 0, 'message' => $e->getMessage()]);
             }
         }
