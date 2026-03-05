@@ -8,6 +8,7 @@ use App\Jobs\WebhookNotificationJob;
 use App\Models\Kyc;
 use App\Models\KycLog;
 use App\Notifications\NotifyAdmin;
+use App\Services\EaseidService;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -63,8 +64,13 @@ class BVNController extends Controller
         Log::info("Running Kyc check on ".$input['number']);
 
         try {
-            $userService = new PremblyService();
-            $data=$userService->bvn($input['number'],$biz->id);
+            if(env('BVN_VERIFICATION') == "PREMBLY"){
+                $userService = new PremblyService();
+                $data=$userService->bvn($input['number'],$biz->id);
+            }else{
+                $userService = new EaseidService();
+                $data=$userService->bvn($input['number'],$biz->id);
+            }
 
             ServiceDebitJob::dispatch($fee, $data['reference'],$biz, 'BVN_VERIFICATION');
 

@@ -8,6 +8,7 @@ use App\Jobs\WebhookNotificationJob;
 use App\Models\KycLog;
 use App\Models\KycNIN;
 use App\Notifications\NotifyAdmin;
+use App\Services\EaseidService;
 use App\Services\MonoService;
 use App\Services\PremblyService;
 use Illuminate\Http\Request;
@@ -69,8 +70,11 @@ class NINController extends Controller
             if(env('NIN_VERIFICATION') == "MONO"){
                 $userService = new MonoService();
                 $data=$userService->nin($input['number'],$biz->id);
-            }else{
+            }elseif(env('NIN_VERIFICATION') == "PREMBLY"){
                 $userService = new PremblyService();
+                $data=$userService->nin($input['number'],$biz->id);
+            }else{
+                $userService = new EaseidService();
                 $data=$userService->nin($input['number'],$biz->id);
             }
 
@@ -209,11 +213,26 @@ class NINController extends Controller
             try {
                 if(env('NIN_VERIFICATION') == "MONO"){
                     $userService = new MonoService();
-                    $res=$userService->nin($input['number'],$biz->id,"API");
+                    $data=$userService->nin($input['number'],$biz->id);
+                }elseif(env('NIN_VERIFICATION') == "PREMBLY"){
+                    $userService = new PremblyService();
+                    $data=$userService->nin($input['number'],$biz->id);
                 }else{
+                    $userService = new EaseidService();
+                    $data=$userService->nin($input['number'],$biz->id);
+                }
+
+                if(env('NIN_VERIFICATION') == "MONO"){
+                    $userService = new MonoService();
+                    $res=$userService->nin($input['number'],$biz->id,"API");
+                }elseif(env('NIN_VERIFICATION') == "PREMBLY"){
                     $userService = new PremblyService();
                     $res=$userService->nin($input['number'],$biz->id,"API");
+                }else{
+                    $userService = new EaseidService();
+                    $res=$userService->nin($input['number'],$biz->id,"API");
                 }
+
                 $kyc=$res['kyc'];
                 $data=$res['data'];
 
