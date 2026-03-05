@@ -32,9 +32,18 @@ class WebhookNotificationJob implements ShouldQueue
 
         $biz=Business::find($this->klog->business_id);
 
-        $data=KycLog::with('bvn','nin')->find($this->klog->id);
+        $data=KycLog::find($this->klog->id);
+
+        if($data->type == "BVN VERIFICATION"){
+            $data->bvn;
+        }
+
+        if($data->type == "NIN VERIFICATION"){
+            $data->nin;
+        }
 
         $datas['event']="verification";
+        $datas['event_type']=$data->type;
         $datas['number']=$this->number;
         $datas['data']=$data->makeHidden(['business_id','kyc_id','kycnin_id','billing_id','user_id','id','updated_at']);
 

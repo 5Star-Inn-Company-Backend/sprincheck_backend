@@ -50,8 +50,11 @@ class NINController extends Controller
 
         $kyc=KycNIN::where('nin', $input['number'])->first();
 
+        $provider=env('NIN_VERIFICATION','EASEID');
+        $provider_cost=0;
+
         if($kyc){
-            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'NIN_VERIFICATION');
+            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'NIN_VERIFICATION',$provider_cost,$provider);
 
             $resp=json_decode($kyc->data,true);
             return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['photo'], 'reference' =>$kyc->reference]]);
@@ -67,10 +70,10 @@ class NINController extends Controller
 
         try {
 
-            if(env('NIN_VERIFICATION') == "MONO"){
+            if($provider == "MONO"){
                 $userService = new MonoService();
                 $data=$userService->nin($input['number'],$biz->id);
-            }elseif(env('NIN_VERIFICATION') == "PREMBLY"){
+            }elseif($provider == "PREMBLY"){
                 $userService = new PremblyService();
                 $data=$userService->nin($input['number'],$biz->id);
             }else{
@@ -78,7 +81,9 @@ class NINController extends Controller
                 $data=$userService->nin($input['number'],$biz->id);
             }
 
-            ServiceDebitJob::dispatch($fee, $data['reference'],$biz, 'NIN_VERIFICATION');
+            $provider_cost=$data['fee'] ?? 0;
+
+            ServiceDebitJob::dispatch($fee,$data['reference'],$biz, 'NIN_VERIFICATION',$provider_cost,$provider);
 
             return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => $data]);
 
@@ -195,10 +200,14 @@ class NINController extends Controller
             return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
         }
 
+        $provider=env('NIN_VERIFICATION','EASEID');
+        $provider_cost=0;
+
+
         $kyc=KycNIN::where('nin', $input['number'])->first();
 
         if($kyc){
-            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'NIN_VERIFICATION');
+            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'NIN_VERIFICATION',$provider_cost,$provider);
 
             $data=json_decode($kyc->data,true);
         }else{
@@ -211,16 +220,6 @@ class NINController extends Controller
             Log::info("Running Kyc check on ".$input['number']);
 
             try {
-                if(env('NIN_VERIFICATION') == "MONO"){
-                    $userService = new MonoService();
-                    $data=$userService->nin($input['number'],$biz->id);
-                }elseif(env('NIN_VERIFICATION') == "PREMBLY"){
-                    $userService = new PremblyService();
-                    $data=$userService->nin($input['number'],$biz->id);
-                }else{
-                    $userService = new EaseidService();
-                    $data=$userService->nin($input['number'],$biz->id);
-                }
 
                 if(env('NIN_VERIFICATION') == "MONO"){
                     $userService = new MonoService();
@@ -235,6 +234,7 @@ class NINController extends Controller
 
                 $kyc=$res['kyc'];
                 $data=$res['data'];
+                $provider_cost=$data['fee'] ?? 0;
 
             } catch (\Exception $e) {
                 Log::error("Error on NIN", [$e]);
@@ -264,7 +264,7 @@ class NINController extends Controller
             WebhookNotificationJob::dispatch($k, $input['number']);
         }
 
-        ServiceDebitJob::dispatch($fee, $reference,$biz, 'NIN_VERIFICATION');
+        ServiceDebitJob::dispatch($fee, $reference,$biz, 'NIN_VERIFICATION',$provider_cost,$provider);
 
         return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'data' => $data]);
     }

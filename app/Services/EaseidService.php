@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Kyc;
 use App\Models\Kyccac;
 use App\Models\KyccacDirector;
 use App\Models\KyccacProfile;
@@ -39,10 +40,10 @@ class EaseidService
 
             Log::info($payload);
 
-            $response=Http::withHeaders([
+            $resp=Http::withHeaders([
                 'countryCode' => 'NG',
                 'Signature' => $sign,
-                'Authorization' => 'Bearer ',
+                'Authorization' => 'Bearer '.env('EASEID_APP_ID'),
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json'
             ])->withoutVerifying()
@@ -51,9 +52,8 @@ class EaseidService
 
             Log::info("EASEID NIN VERIFICATION");
             Log::info($payload);
-            Log::info($response);
+            Log::info(json_encode($resp));
 
-            $resp = json_decode($response, true);
         } catch (\Exception $e) {
             Log::info("Error encountered on EASEID verification on " . $number);
             Log::info($e->getMessage());
@@ -65,23 +65,23 @@ class EaseidService
             throw new \Exception('Verification Failed. '.$resp['respMsg']);
         }
 
-        $name=$resp['data']['surname'] . " " .$resp['data']['firstName'] . " " .$resp['data']['middleName'];
+        $name=$resp['data']['lastName'] . " " .$resp['data']['firstName'] . " " .$resp['data']['middleName'];
 
         $ref=$resp['requestId'];
 
-        $k=KycNIN::create([
+        $k=Kyc::create([
             "user_id" => $user_id,
-            "nin" => $number,
+            "bvn" => $number,
             "reference" => $ref,
             "name" => $name,
-            "source" => "MONO",
+            "source" => "EASEID",
             "data" => json_encode($resp['data']),
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['data']['photo'], 'reference' =>$ref];
+            return  ['image' => $resp['data']['photo'], 'reference' =>$ref, 'fee' => env('EASEID_BVN_FEE',18.03)] ;
         }else{
-            return ['kyc' => $k, 'data' => $resp['data']] ;
+            return ['kyc' => $k, 'data' => $resp['data'], 'fee' => env('EASEID_BVN_FEE',18.03)] ;
         }
     }
 
@@ -107,10 +107,10 @@ class EaseidService
 
             Log::info($payload);
 
-            $response=Http::withHeaders([
+            $resp=Http::withHeaders([
                 'countryCode' => 'NG',
                 'Signature' => $sign,
-                'Authorization' => 'Bearer ',
+                'Authorization' => 'Bearer '.env('EASEID_APP_ID'),
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json'
             ])->withoutVerifying()
@@ -119,9 +119,7 @@ class EaseidService
 
             Log::info("EASEID NIN VERIFICATION");
             Log::info($payload);
-            Log::info($response);
-
-            $resp = json_decode($response, true);
+            Log::info(json_encode($resp));
         } catch (\Exception $e) {
             Log::info("Error encountered on EASEID verification on " . $number);
             Log::info($e->getMessage());
@@ -142,14 +140,14 @@ class EaseidService
             "nin" => $number,
             "reference" => $ref,
             "name" => $name,
-            "source" => "MONO",
+            "source" => "EASEID",
             "data" => json_encode($resp['data']),
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['data']['photo'], 'reference' =>$ref];
+            return  ['image' => $resp['data']['photo'], 'reference' =>$ref, 'fee' => env('EASEID_NIN_FEE',36.05)];
         }else{
-            return ['kyc' => $k, 'data' => $resp['data']] ;
+            return ['kyc' => $k, 'data' => $resp['data'], 'fee' => env('EASEID_NIN_FEE',36.05)] ;
         }
     }
 

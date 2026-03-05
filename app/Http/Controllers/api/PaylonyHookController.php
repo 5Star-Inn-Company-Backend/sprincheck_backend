@@ -49,7 +49,9 @@ class PaylonyHookController extends Controller
             $gateway = $input['gateway'];
             $rvn['charges'] = 80;
             $rvn['business_id'] = $vac->business_id;
-            $rvn['amount_credit'] = $rvn['amount'] - $rvn['charges'];
+            $rvn['vat_rate'] = (float) env('VAT_RATE', 0.075);
+            $rvn['vat_amount'] = round(((float) $rvn['charges']) * $rvn['vat_rate'], 2);
+            $rvn['amount_credit'] = (float) $rvn['amount'] - (float) $rvn['charges'] - (float) $rvn['vat_amount'];
 
             if ($rvn['amount_credit'] > 0) {
                 $w = WalletTracker::where('reference', $rvn['transactionreference'])->first();
@@ -69,6 +71,15 @@ class PaylonyHookController extends Controller
     {
         $biz = Business::find($rvn['business_id']);
 
+        $vatRate = array_key_exists('vat_rate', $rvn) ? (float) $rvn['vat_rate'] : (float) env('VAT_RATE', 0.075);
+        $vatAmount = array_key_exists('vat_amount', $rvn)
+            ? (float) $rvn['vat_amount']
+            : round(((float) $rvn['charges']) * $vatRate, 2);
+
+        $amountCredit = array_key_exists('amount_credit', $rvn)
+            ? (float) $rvn['amount_credit']
+            : ((float) $rvn['amount'] - (float) $rvn['charges'] - (float) $vatAmount);
+
         WalletTracker::create([
             'reference' => $rvn['transactionreference'],
             'description' => 'Business Account Funded by ' . $rvn['from_acct_name'],
@@ -76,7 +87,7 @@ class PaylonyHookController extends Controller
             'business_id' => $biz->id,
             'type' => 'credit',
             'pre_wallet' => $biz->wallet,
-            'post_wallet' => $biz->wallet + $rvn['amount'],
+            'post_wallet' => $biz->wallet + (float) $rvn['amount'],
         ]);
 
         WalletTracker::create([
@@ -85,12 +96,24 @@ class PaylonyHookController extends Controller
             'amount' => $rvn['charges'],
             'business_id' => $biz->id,
             'type' => 'debit',
-            'pre_wallet' => $biz->wallet + $rvn['amount'],
-            'post_wallet' => $biz->wallet + $rvn['amount'] - $rvn['charges'],
+            'pre_wallet' => $biz->wallet + (float) $rvn['amount'],
+            'post_wallet' => $biz->wallet + (float) $rvn['amount'] - (float) $rvn['charges'],
         ]);
 
+        if ($vatAmount > 0) {
+            WalletTracker::create([
+                'reference' => $rvn['transactionreference']."_vat",
+                'description' => "VAT on funding fee",
+                'amount' => $vatAmount,
+                'business_id' => $biz->id,
+                'type' => 'debit',
+                'pre_wallet' => $biz->wallet + (float) $rvn['amount'] - (float) $rvn['charges'],
+                'post_wallet' => $biz->wallet + (float) $rvn['amount'] - (float) $rvn['charges'] - (float) $vatAmount,
+            ]);
+        }
 
-        $biz->wallet += $rvn['amount_credit'];
+
+        $biz->wallet += $amountCredit;
         $biz->save();
 
         $pnl["type"] = "income";
@@ -100,6 +123,15 @@ class PaylonyHookController extends Controller
         $pnl["narration"] = "Being amount charged for using automated funding from " . $biz->name . " (" . $biz->id . ")" . " with ref " . $rvn['transactionreference'];
 
         PndL::create($pnl);
+
+        if ($vatAmount > 0) {
+            $vatPnl = [];
+            $vatPnl["type"] = "vat";
+            $vatPnl["gl"] = "VAT Payable";
+            $vatPnl["amount"] = $vatAmount;
+            $vatPnl["narration"] = "Being VAT on funding fee from " . $biz->name . " (" . $biz->id . ")" . " with ref " . $rvn['transactionreference'];
+            PndL::create($vatPnl);
+        }
     }
 }
 

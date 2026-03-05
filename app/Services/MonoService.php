@@ -79,9 +79,9 @@ class MonoService
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['data']['photo'], 'reference' =>$ref];
+            return  ['image' => $resp['data']['photo'], 'reference' =>$ref, 'fee' => env('MONO_NIN_FEE',86)];
         }else{
-            return ['kyc' => $k, 'data' => $resp['data']] ;
+            return ['kyc' => $k, 'data' => $resp['data'], 'fee' => env('MONO_NIN_FEE',86)];
         }
     }
     public function drivers_license($number, $dob,$fname,$lname, $user_id, $type="sdk"){
@@ -482,7 +482,7 @@ class MonoService
             Log::info($response);
 
         } catch (\Exception $e) {
-            Log::info("Error encountered on Mono account verification on " . $rc);
+            Log::info("Error encountered on Mono account verification on " . $e->getMessage());
             Log::info($e);
 
             throw new \Exception('Unable to verify try again later.');

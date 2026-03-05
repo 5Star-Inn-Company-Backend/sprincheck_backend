@@ -70,9 +70,9 @@ class PremblyService
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['bvn_data']['base64Image'], 'reference' =>$ref];
+            return  ['image' => $resp['bvn_data']['base64Image'], 'reference' =>$ref, 'fee' => $resp['billing_info']['amount']];
         }else{
-            return ['kyc' => $k, 'data' => $resp['bvn_data']] ;
+            return ['kyc' => $k, 'data' => $resp['bvn_data'], 'fee' => $resp['billing_info']['amount'] ] ;
         }
 
     }
@@ -136,9 +136,9 @@ class PremblyService
         ]);
 
         if($type == "sdk"){
-            return  ['image' => $resp['nin_data']['photo'], 'reference' =>$ref];
+            return  ['image' => $resp['nin_data']['photo'], 'reference' =>$ref, 'fee' => $resp['billing_info']['amount']];
         }else{
-            return ['kyc' => $k, 'data' => $resp['nin_data']] ;
+            return ['kyc' => $k, 'data' => $resp['nin_data'], 'fee' => $resp['billing_info']['amount']] ;
         }
     }
     public function passport($number, $dob, $user_id, $type="sdk"){
@@ -202,7 +202,7 @@ class PremblyService
         if($type == "sdk"){
             throw new \Exception('SDK not supported.');
         }else{
-            return ['kyc' => $k, 'data' => $resp['data']] ;
+            return ['kyc' => $k, 'data' => $resp['data'], 'fee' => $resp['billing_info']['amount']] ;
         }
     }
 
@@ -256,9 +256,9 @@ class PremblyService
             ]);
 
             if($type == "sdk"){
-                return  ['image' => $resp['data']['photo'], 'reference' =>$resp['billing_info']['transaction_id']];
+                return  ['image' => $resp['data']['photo'], 'reference' =>$resp['billing_info']['transaction_id'], 'fee' => $resp['billing_info']['amount']];
             }else{
-                return ['kyc' => $k, 'data' => $resp['data']] ;
+                return ['kyc' => $k, 'data' => $resp['data'], 'fee' => $resp['billing_info']['amount']] ;
             }
 
         } catch (\Exception $e) {

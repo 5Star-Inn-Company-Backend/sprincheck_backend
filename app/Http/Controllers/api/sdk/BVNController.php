@@ -48,8 +48,11 @@ class BVNController extends Controller
 
         $kyc=Kyc::where('bvn', $input['number'])->first();
 
+        $provider=env('BVN_VERIFICATION','EASEID');
+        $provider_cost=0;
+
         if($kyc){
-            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'BVN_VERIFICATION');
+            ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'BVN_VERIFICATION',$provider_cost,$provider);
 
             $resp=json_decode($kyc->data,true);
             return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['base64Image'], 'reference' =>$kyc->reference]]);
@@ -64,7 +67,7 @@ class BVNController extends Controller
         Log::info("Running Kyc check on ".$input['number']);
 
         try {
-            if(env('BVN_VERIFICATION') == "PREMBLY"){
+            if($provider == "PREMBLY"){
                 $userService = new PremblyService();
                 $data=$userService->bvn($input['number'],$biz->id);
             }else{
@@ -72,7 +75,9 @@ class BVNController extends Controller
                 $data=$userService->bvn($input['number'],$biz->id);
             }
 
-            ServiceDebitJob::dispatch($fee, $data['reference'],$biz, 'BVN_VERIFICATION');
+            $provider_cost=$data['fee'] ?? 0;
+
+            ServiceDebitJob::dispatch($fee,$data['reference'],$biz, 'BVN_VERIFICATION',$provider_cost,$provider);
 
             return response()->json(['success' => 1, 'message' => 'Verified Successfully',  'confidence_level'=>$biz->confidence_level, 'data' => $data]);
 
@@ -187,10 +192,13 @@ class BVNController extends Controller
             return response()->json(['success' => 0, 'message' => "It cannot be processed. Check your wallet balance"]);
         }
 
+        $provider=env('BVN_VERIFICATION','EASEID');
+        $provider_cost=0;
+
         $kyc=Kyc::where('bvn', $input['number'])->first();
 
         if($kyc){
-            ServiceDebitJob::dispatch($fee, $reference,$biz,'BVN_VERIFICATION');
+            ServiceDebitJob::dispatch($fee, $reference,$biz,'BVN_VERIFICATION',$provider_cost,$provider);
 
             $data=json_decode($kyc->data,true);
         }else{
@@ -203,10 +211,17 @@ class BVNController extends Controller
             Log::info("Running Kyc check on ".$input['number']);
 
             try {
-                $userService = new PremblyService();
-                $res=$userService->bvn($input['number'],$biz->id,"API");
-                $kyc=$res['kyc'];
-                $data=$res['data'];
+                if($provider == "PREMBLY") {
+                    $userService = new PremblyService();
+                    $res = $userService->bvn($input['number'], $biz->id, "API");
+                }else{
+                    $userService = new EaseidService();
+                    $res=$userService->bvn($input['number'],$biz->id);
+                }
+
+                $kyc = $res['kyc'];
+                $data = $res['data'];
+                $provider_cost=$data['fee'] ?? 0;
 
             } catch (\Exception $e) {
                 Log::error("Error on BVN", [$e]);
@@ -236,7 +251,7 @@ class BVNController extends Controller
             WebhookNotificationJob::dispatch($k, $input['number']);
         }
 
-        ServiceDebitJob::dispatch($fee, $reference,$biz, 'BVN_VERIFICATION');
+        ServiceDebitJob::dispatch($fee,$reference,$biz, 'BVN_VERIFICATION',$provider_cost,$provider);
 
         return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'data' => $data]);
     }
