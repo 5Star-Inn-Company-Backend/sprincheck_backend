@@ -34,18 +34,38 @@ class WebhookNotificationJob implements ShouldQueue
 
         $data=KycLog::find($this->klog->id);
 
-        if($data->type == "BVN VERIFICATION"){
-            $data->bvn;
+        $kycDetails = null;
+        if ($data && $data->type === 'BVN VERIFICATION' && $data->bvn) {
+            $kycDetails = $data->bvn->data;
+        } elseif ($data && $data->type === 'NIN VERIFICATION' && $data->nin) {
+            $kycDetails = $data->nin->data;
+        } elseif ($data && $data->type === 'DRIVERLICENSE VERIFICATION' && $data->dlicense) {
+            $kycDetails = $data->dlicense->data;
+        } elseif ($data && $data->type === 'PASSPORT VERIFICATION' && $data->passport) {
+            $kycDetails = $data->passport->data;
+        } elseif ($data && $data->type === 'VOTERS VERIFICATION' && $data->voters) {
+            $kycDetails = $data->voters->data;
+        } elseif ($data && ($data->type === 'FACE LIVENESS' || $data->type === 'FACE DETECTION' || $data->type === 'FACE COMPARE') && $data->facevers) {
+            $kycDetails = $data->facevers->data;
         }
 
-        if($data->type == "NIN VERIFICATION"){
-            $data->nin;
-        }
+        $occurredAt = Carbon::now()->toIso8601String();
+        $reference = $data ? $data->reference : null;
 
-        $datas['event']="verification";
-        $datas['event_type']=$data->type;
-        $datas['number']=$this->number;
-        $datas['data']=$data->makeHidden(['business_id','kyc_id','kycnin_id','billing_id','user_id','id','updated_at']);
+        $datas = [];
+        $datas['schema_version'] = 1;
+        $datas['event'] = 'verification';
+        $datas['event_type'] = $data ? $data->type : null;
+        $datas['event_id'] = $reference ? ($reference . ':' . $occurredAt) : (string) $occurredAt;
+        $datas['occurred_at'] = $occurredAt;
+        $datas['reference'] = $reference;
+        $datas['number'] = $this->number;
+        $datas['status'] = $data ? $data->status : null;
+        $datas['source'] = $data ? $data->source : null;
+        $datas['confidence'] = $data ? $data->confidence : null;
+        $datas['image'] = $data ? $data->image : null;
+        $datas['identifier'] = $data ? $data->identifier : null;
+        $datas['kyc_details'] = json_decode($kycDetails,true);
 
         $data = json_encode($datas);
 
@@ -63,8 +83,8 @@ class WebhookNotificationJob implements ShouldQueue
             CURLOPT_POSTFIELDS => $data,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER => array(
-                'payloadSignature: '. hash_hmac("SHA512", $data, $biz->encryption_key),
-                'timestamp: ' . Carbon::now(),
+                'X-Sprintcheck-Signature: '. hash_hmac("SHA512", $data, $biz->encryption_key),
+                'X-Sprintcheck-Timestamp: ' . Carbon::now()->toIso8601String(),
                 'Content-Type: application/json'
             ),
         ));

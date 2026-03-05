@@ -55,7 +55,7 @@ class BVNController extends Controller
             ServiceDebitJob::dispatch($fee, $kyc->reference,$biz,'BVN_VERIFICATION',$provider_cost,$provider);
 
             $resp=json_decode($kyc->data,true);
-            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['base64Image'], 'reference' =>$kyc->reference]]);
+            return response()->json(['success' => 1, 'message' => 'Verified Successfully', 'confidence_level'=>$biz->confidence_level, 'data' => ['image' => $resp['base64Image']?? $resp['photo'], 'reference' =>$kyc->reference]]);
         }
 
 
