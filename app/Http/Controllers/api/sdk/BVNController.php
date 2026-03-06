@@ -216,7 +216,7 @@ class BVNController extends Controller
                     $res = $userService->bvn($input['number'], $biz->id, "API");
                 }else{
                     $userService = new EaseidService();
-                    $res=$userService->bvn($input['number'],$biz->id);
+                    $res=$userService->bvn($input['number'],$biz->id,"API");
                 }
 
                 $kyc = $res['kyc'];
