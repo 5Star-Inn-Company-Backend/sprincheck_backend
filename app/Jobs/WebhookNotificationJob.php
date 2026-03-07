@@ -7,6 +7,7 @@ use App\Models\KycLog;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 class WebhookNotificationJob implements ShouldQueue
 {
@@ -33,6 +34,8 @@ class WebhookNotificationJob implements ShouldQueue
         $biz=Business::find($this->klog->business_id);
 
         $data=KycLog::find($this->klog->id);
+
+        Log::info("SENDING WEBHOOK FOR " . $data->type . " FOR " . $this->number . " " . $biz->name. " : " . $biz->webhook_url);
 
         $kycDetails = null;
         if ($data && $data->type === 'BVN VERIFICATION' && $data->bvn) {
@@ -92,6 +95,9 @@ class WebhookNotificationJob implements ShouldQueue
         $response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
+
+
+        Log::info("WEBHOOK DETAILS FOR " . $this->number . " " . $biz->webhook_url. " : " . json_encode($response));
 
     }
 }
